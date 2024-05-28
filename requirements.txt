@@ -9,6 +9,7 @@ markdown
 django-filter
 drf-yasg[validation]
 djangorestframework-simplejwt
+django-cors-headers
 
 # Deployment
 gunicorn
