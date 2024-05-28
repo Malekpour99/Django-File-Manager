@@ -1,0 +1,66 @@
+services:
+
+  redis:
+    image: redis
+    container_name: redis-service
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - mode: ingress
+        target: 6379
+        published: 6379
+        protocol: tcp
+
+  backend:
+    build: .
+    container_name: django-backend-service
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000 & celery -A core beat"
+    ports:
+      - mode: ingress
+        target: 8000
+        published: 8000
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ./core
+        target: /app
+        bind:
+          create_host_path: true
+    depends_on:
+      - redis
+    environment:
+      SECRET_KEY: "django-insecure-&fnvrp83$x0zt0(s=53r4gv5h#1s-a)t-fuqo$1bq2nvl(h381"
+      DEBUG: True
+
+  # Celery Worker
+  worker:
+    build: .
+    command: celery -A core worker -l INFO
+    volumes:
+      - type: bind
+        source: ./core
+        target: /app
+        bind:
+          create_host_path: true
+    depends_on:
+      - redis
+      - backend
+
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    ports:
+      # Change the number before : to the port the web interface should be accessible on
+      - '5000:80'
+      # Change the number before : to the port the SMTP server should be accessible on
+      - '25:25'
+      # Change the number before : to the port the IMAP server should be accessible on
+      - '143:143'
+    volumes:
+      # where smtp4dev stores the database
+      - smtp4dev-data:/smtp4dev
+    environment:
+      #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
+      - ServerOptions__HostName=smtp4dev
+
+volumes:
+  smtp4dev-data:
