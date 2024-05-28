@@ -127,3 +127,14 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Using console based Email, instead of Gmail SMTP Service
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# SMTP service configuration for sending emails
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp4dev"  # Docker compose service name (instead of 'localhost')
+EMAIL_PORT = 25
+EMAIL_USE_TLS = False
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
