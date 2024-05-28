@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block main_content %}
+  <section class="h-50 d-flex justify-content-center align-items-center mt-5">
+    <p class="fs-4 text-center">
+      You have logged out. <br /> <a href="{% url 'accounts:login' %}">login</a> again to manage your files!
+    </p>
+  </section>
+{% endblock %}
