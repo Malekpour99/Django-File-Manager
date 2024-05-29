@@ -25,13 +25,16 @@ def validate_file_type(value):
         "image/tiff",
         "video/mp4",
         "video/mkv",
+        "video/wmv",
+        "video/mov",
+        "video/avi",
         "video/mpeg",
         "video/quicktime",
         "video/x-msvideo",
         "video/x-ms-wmv",
     ]
-    mime_type, _ = mimetypes.guess_type(value.name)
-    if mime_type not in valid_mime_types:
+    mime_type, encoding = mimetypes.guess_type(value.name)
+    if mime_type not in valid_mime_types or mime_type is None:
         raise ValidationError(
             _("Unsupported file type. Allowed types are: %(valid_mime_types)s"),
             params={"valid_mime_types": ", ".join(valid_mime_types)},
@@ -40,9 +43,12 @@ def validate_file_type(value):
 
 # File size custom validator
 def validate_file_size(value):
-    max_file_size = 7 * 1024 * 1024  # 7 MB
-    if value.size > max_file_size:
-        raise ValidationError(_("File size exceeds the maximum limit of 7 MB"))
+    max_size_mb = 7
+    if value.size > max_size_mb * 1024 * 1024:
+        raise ValidationError(
+            _("File size exceeds the maximum limit of %(max_size_mb)d MB"),
+            params={"max_size_mb": max_size_mb},
+        )
 
 
 # Abstract Base Model
