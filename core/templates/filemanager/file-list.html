@@ -18,11 +18,11 @@
                   {% endif %}
                 {% endfor %}
               {% endif %}
-              <form class="row g-3 text-center mb-4 pb-2" method="post" action="">
+              <form class="row g-3 text-center mb-4 pb-2" method="post" action="{% url 'filemanager:upload-file' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="col-9 ps-5">
                   <div class="form-outline">
-                    <input type="file" id="task-title" name="title" class="form-control" placeholder="Choose a file.." />
+                    <input type="file" id="task-title" name="file" class="form-control" placeholder="Choose a file.." />
                   </div>
                 </div>
 
