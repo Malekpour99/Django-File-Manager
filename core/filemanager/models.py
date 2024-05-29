@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms import ValidationError
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 import os
@@ -41,7 +42,7 @@ def validate_file_type(value):
 def validate_file_size(value):
     max_file_size = 7 * 1024 * 1024  # 7 MB
     if value.size > max_file_size:
-        raise ValidationError(_("File size exceeds the maximum limit of 10 MB"))
+        raise ValidationError(_("File size exceeds the maximum limit of 7 MB"))
 
 
 # Abstract Base Model
@@ -56,6 +57,7 @@ class BaseModel(models.Model):
 # Models
 class Folder(BaseModel):
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True)
     owner = models.ForeignKey(
         "accounts.Profile", on_delete=models.CASCADE, related_name="folders"
     )
@@ -69,6 +71,21 @@ class Folder(BaseModel):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+            # Ensure the slug is unique within the same parent folder
+            while Folder.objects.filter(
+                slug=self.slug, parent_folder=self.parent_folder
+            ).exists():
+                self.slug = f"{self.slug}-{self.id}"
+        super().save(*args, **kwargs)
+
+    def get_nested_path(self):
+        if self.parent_folder:
+            return f"{self.parent_folder.get_nested_path()}/{self.slug}"
+        return self.slug
 
     class Meta:
         unique_together = ("name", "parent_folder", "owner")
