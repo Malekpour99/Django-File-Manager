@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block main_content %}
+  <section class="h-100 w-100" style="background-color: #eee;">
+    <div class="container py-2 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-lg-12 col-xl-12">
+          <div class="card rounded-3">
+            <div class="card-body p-4">
+              <h4 class="text-center my-3 pb-3">File Manager App</h4>
+              {% if form.errors %}
+                {% for field in form %}
+                  {% if field.errors %}
+                    {% for error in field.errors %}
+                      <p class="text-danger ps-5">{{ field.name|title }} - {{ error|escape }}</p>
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              <form class="row g-3 text-center mb-4 pb-2" method="post" action="">
+                {% csrf_token %}
+                <div class="col-9 ps-5">
+                  <div class="form-outline">
+                    <input type="file" id="task-title" name="title" class="form-control" placeholder="Choose a file.." />
+                  </div>
+                </div>
+
+                <div class="d-grid col-3 pe-5">
+                  <button type="submit" class="btn btn-outline-primary">Upload</button>
+                </div>
+              </form>
+              <br>
+
+              <table class="table mb-4">
+                <thead>
+                  <tr>
+                    <th scope="col">Preview</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for file in files %}
+                    <tr>
+                      <td class="col-1"><img src="{{ file.thumbnail.url }}" alt="{{ file.name }}"></td>
+                      <td class="col-6">{{ file.name }}<p class="fw-light">{{file.owner}}</p></td>
+                      <td class="col-1">{{ file.formatted_size }}</td>
+                      <td class="col-4">
+                        <a type="button" class="btn btn-primary" href="">Rename</a>
+
+                        <a type="button" class="btn btn-danger" href="">Delete</a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
