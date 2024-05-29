@@ -10,6 +10,7 @@ django-filter
 drf-yasg[validation]
 djangorestframework-simplejwt
 django-cors-headers
+moviepy
 
 # Deployment
 gunicorn
