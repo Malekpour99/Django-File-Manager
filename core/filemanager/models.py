@@ -36,8 +36,7 @@ def validate_file_type(value):
     mime_type, encoding = mimetypes.guess_type(value.name)
     if mime_type not in valid_mime_types or mime_type is None:
         raise ValidationError(
-            _("Unsupported file type. Allowed types are: %(valid_mime_types)s"),
-            params={"valid_mime_types": ", ".join(valid_mime_types)},
+            _("Unsupported file type. Only videos and images are supported.")
         )
 
 
