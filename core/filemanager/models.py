@@ -105,6 +105,19 @@ class File(BaseModel):
         "accounts.Profile", on_delete=models.CASCADE, related_name="files"
     )
 
+    @property
+    def formatted_size(self):
+        """
+        Returns the file size in human-readable format.
+        """
+        size = self.size
+        if size < 1024:
+            return "%d B" % size
+        elif size < 1024 * 1024:
+            return "%.1f KB" % (size / 1024)
+        else:
+            return "%.1f MB" % (size / (1024 * 1024))
+
     def __str__(self):
         return self.name
 
@@ -126,16 +139,20 @@ class File(BaseModel):
     def create_image_thumbnail(self):
         thumbnail_size = (100, 100)
         image = Image.open(self.file)
-        image.thumbnail(thumbnail_size, Image.ANTIALIAS)
-        thumbnail_path = os.path.join("thumbnails", os.path.basename(self.file.name))
+        image.thumbnail(thumbnail_size, Image.LANCZOS)
+        thumbnail_dir = "media/thumbnails"
+        os.makedirs(thumbnail_dir, exist_ok=True) 
+        thumbnail_path = os.path.join("media/thumbnails", os.path.basename(self.file.name))
         image.save(thumbnail_path)
         self.thumbnail = thumbnail_path
         self.save()
 
     def create_video_thumbnail(self):
         thumbnail_size = "100x100"
+        thumbnail_dir = "media/thumbnails"
+        os.makedirs(thumbnail_dir, exist_ok=True)
         thumbnail_path = os.path.join(
-            "thumbnails", os.path.basename(self.file.name) + ".jpg"
+            "media/thumbnails", os.path.basename(self.file.name) + ".jpg"
         )
         file_path = self.file.path
         command = [
