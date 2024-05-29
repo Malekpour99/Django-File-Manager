@@ -6,11 +6,12 @@ from .models import File, Folder
 class FileAdmin(admin.ModelAdmin):
     # Activates post filtering by date hierarchy
     date_hierarchy = "created_at"
-    empty_value_display = "-empty-"
+    empty_value_display = "-NONE-"
     list_display = (
         "name",
         "owner",
-        "size",
+        "folder",
+        "formatted_size",
         "created_at",
         "updated_at",
     )
