@@ -92,11 +92,11 @@ class Folder(BaseModel):
 
 
 class File(BaseModel):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, blank=True)
     file = models.FileField(
         upload_to="uploads/", validators=[validate_file_type, validate_file_size]
     )
-    size = models.PositiveIntegerField()
+    size = models.PositiveIntegerField(blank=True)
     thumbnail = models.ImageField(upload_to="thumbnails/", null=True, blank=True)
     folder = models.ForeignKey(
         Folder, on_delete=models.CASCADE, related_name="files", null=True, blank=True
@@ -111,8 +111,7 @@ class File(BaseModel):
     def save(self, *args, **kwargs):
         if not self.name:
             self.name = os.path.basename(self.file.name)
-        if not self.size:
-            self.size = self.file.size
+        self.size = self.file.size
         super().save(*args, **kwargs)
         if not self.thumbnail:
             self.create_thumbnail()
