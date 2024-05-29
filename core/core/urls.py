@@ -19,7 +19,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.shortcuts import redirect
 
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -39,6 +38,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path("", include("filemanager.urls")),
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("api-auth/", include("rest_framework.urls")),
