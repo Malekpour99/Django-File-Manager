@@ -6,8 +6,8 @@ from django.utils.translation import gettext_lazy as _
 import os
 import logging
 import mimetypes
-import subprocess
 from PIL import Image
+from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
 # logging Configuration
@@ -140,38 +140,36 @@ class File(BaseModel):
         thumbnail_size = (100, 100)
         image = Image.open(self.file)
         image.thumbnail(thumbnail_size, Image.LANCZOS)
-        thumbnail_dir = "media/thumbnails"
-        os.makedirs(thumbnail_dir, exist_ok=True) 
-        thumbnail_path = os.path.join("media/thumbnails", os.path.basename(self.file.name))
-        image.save(thumbnail_path)
+        thumbnail_dir = "thumbnails"
+        os.makedirs(thumbnail_dir, exist_ok=True)
+        thumbnail_filename = os.path.basename(self.file.name)
+        thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename)
+        thumbnail_full_path = os.path.join("media/", thumbnail_path)
+        image.save(thumbnail_full_path)
         self.thumbnail = thumbnail_path
         self.save()
 
     def create_video_thumbnail(self):
-        thumbnail_size = "100x100"
-        thumbnail_dir = "media/thumbnails"
+        thumbnail_size = (100, 100)
+        thumbnail_dir = "thumbnails"
         os.makedirs(thumbnail_dir, exist_ok=True)
-        thumbnail_path = os.path.join(
-            "media/thumbnails", os.path.basename(self.file.name) + ".jpg"
-        )
+        thumbnail_filename = os.path.basename(self.file.name)
+        thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename + ".jpg")
+        thumbnail_full_path = os.path.join("media/", thumbnail_path)
         file_path = self.file.path
-        command = [
-            "ffmpeg",
-            "-i",
-            file_path,
-            "-ss",
-            "00:00:01.000",
-            "-vframes",
-            "1",
-            "-s",
-            thumbnail_size,
-            thumbnail_path,
-        ]
         try:
-            subprocess.run(command, check=True)
+            clip = VideoFileClip(file_path)
+            frame = clip.get_frame(1)  # Capture frame at 1 second
+            clip.close()
+
+            thumbnail = Image.fromarray(frame)
+            thumbnail.thumbnail(thumbnail_size)
+
+            thumbnail.save(thumbnail_full_path)
+
             self.thumbnail = thumbnail_path
             self.save()
-        except subprocess.CalledProcessError as error:
+        except Exception as error:
             logger.error(
                 f"Failed to create thumbnail for video {self.file.name}: {error}"
             )
