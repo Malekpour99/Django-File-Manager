@@ -23,7 +23,7 @@ class ContentView(LoginRequiredMixin, View):
         )
         folder_path = "home"
         context = {"files": files, "folders": folders, "folder_path": folder_path}
-        return render(request, "filemanager/file-list.html", context)
+        return render(request, "filemanager/content-list.html", context)
 
 
 class FileUploadView(LoginRequiredMixin, CreateView):
@@ -31,7 +31,7 @@ class FileUploadView(LoginRequiredMixin, CreateView):
     Uploading a new file and dedicating this file to the current user
     """
 
-    template_name = "filemanager/file-list.html"
+    template_name = "filemanager/content-list.html"
     model = File
     fields = ["file"]
     success_url = reverse_lazy("filemanager:home")
@@ -52,5 +52,5 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
     """
 
     model = File
-    template_name = "filemanager/file-list.html"
+    template_name = "filemanager/content-list.html"
     success_url = reverse_lazy("filemanager:home")
