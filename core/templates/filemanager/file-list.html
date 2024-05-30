@@ -30,7 +30,7 @@
                   <button type="submit" class="btn btn-outline-primary">Upload</button>
                 </div>
               </form>
-              <br>
+              <br />
 
               <table class="table mb-4">
                 <thead>
@@ -45,14 +45,18 @@
                 <tbody>
                   {% for file in files %}
                     <tr>
-                      <td class="col-1"><img src="{{ file.thumbnail.url }}" alt="{{ file.name }}"></td>
-                      <td class="col-5">{{ file.name }}<p class="fw-light">{{file.owner}}</p></td>
+                      <td class="col-1 text-center">
+                        <img src="{{ file.thumbnail.url }}" alt="{{ file.name }}" />
+                      </td>
+                      <td class="col-5">
+                        {{ file.name }}<p class="fw-light">{{ file.owner }}</p>
+                      </td>
                       <td class="col-1">{{ file.formatted_size }}</td>
-                      <td class="col-2">{{ file.created_at|date:"d M Y" }}</td>
+                      <td class="col-2">{{ file.created_at|date:'d M Y' }}</td>
                       <td class="col-3">
-                        <a type="button" class="btn btn-primary" href="">Rename</a>
+                        <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
 
-                        <a type="button" class="btn btn-danger" href="">Delete</a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
                       </td>
                     </tr>
                   {% endfor %}
@@ -64,4 +68,40 @@
       </div>
     </div>
   </section>
+
+  <!-- Delete Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Delete File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the file <strong id="file-name"></strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form method="post" id="delete-form" action="">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const deleteModal = document.getElementById('deleteModal')
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget
+      const fileId = button.getAttribute('data-file-id')
+      const fileName = button.getAttribute('data-file-name')
+      const modalFileName = deleteModal.querySelector('#file-name')
+      const deleteForm = deleteModal.querySelector('#delete-form')
+    
+      modalFileName.textContent = fileName
+      deleteForm.action = "{% url 'filemanager:delete-file' pk=0 %}".replace('0', fileId)
+    })
+  </script>
 {% endblock %}
