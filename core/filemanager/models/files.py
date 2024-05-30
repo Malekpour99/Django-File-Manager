@@ -15,8 +15,15 @@ from .base import BaseModel
 from .folders import Folder
 
 # Default Thumbnail for video files
-DEFAULT_THUMBNAIL_PATH = os.path.join(settings.BASE_DIR, 'static/img/default-video-thumbnail.png')
+DEFAULT_THUMBNAIL_PATH = os.path.join(
+    settings.BASE_DIR, "static/img/default-video-thumbnail.png"
+)
 
+#
+FILE_TYPE_CHOICES = [
+    ("video", "Video"),
+    ("image", "Image"),
+]
 
 # logger object
 logger = logging.getLogger(__name__)
@@ -64,6 +71,7 @@ class File(BaseModel):
     file = models.FileField(
         upload_to="uploads/", validators=[validate_file_type, validate_file_size]
     )
+    type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES)
     size = models.PositiveIntegerField(blank=True)
     thumbnail = models.ImageField(upload_to="thumbnails/", null=True, blank=True)
     folder = models.ForeignKey(
@@ -92,10 +100,20 @@ class File(BaseModel):
     def save(self, *args, **kwargs):
         if not self.name:
             self.name = os.path.basename(self.file.name)
-        self.size = self.file.size
+        if not self.size:
+            self.size = self.file.size
+        if not self.type:
+            self.type = self.choose_file_type()
         super().save(*args, **kwargs)
         if not self.thumbnail:
             self.create_thumbnail()
+
+    def choose_file_type(self):
+        mime_type, _ = mimetypes.guess_type(self.file.name)
+        if mime_type.startswith("image"):
+            return "image"
+        elif mime_type.startswith("video"):
+            return "video"
 
     def create_thumbnail(self):
         mime_type, _ = mimetypes.guess_type(self.file.name)
