@@ -35,7 +35,7 @@ class Folder(BaseModel):
 
     def get_nested_path(self):
         if self.parent_folder:
-            return f"{self.parent_folder.get_nested_path()}/{self.name}"
+            return f"{self.parent_folder.get_nested_path()} / {self.name}"
         return self.name
 
     class Meta:
