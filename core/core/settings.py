@@ -15,6 +15,8 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 
+from django.urls import reverse_lazy
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -150,6 +152,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # User Manager Configuration
 AUTH_USER_MODEL = "accounts.User"
+
+# Successful login redirection configuration (in case next parameter is not specified)
+LOGIN_REDIRECT_URL = reverse_lazy("filemanager:home")
 
 # REST Framework global configuration
 REST_FRAMEWORK = {
