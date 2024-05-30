@@ -24,10 +24,6 @@
               <a class="nav-link {% if request.path == '/' %} active {% endif %}" 
                 href="{% url 'filemanager:home' %}">Home</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link {% if request.path == '/accounts/profile/' %} active {% endif %}" 
-              href="{% url 'accounts:profile' %}">Profile</a>
-            </li>
             {% if request.user.is_authenticated %}
               <li class="nav-item">
                 <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
