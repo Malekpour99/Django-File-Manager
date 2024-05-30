@@ -15,14 +15,24 @@ class ContentView(LoginRequiredMixin, View):
     """
 
     def get(self, request, *args, **kwargs):
+        folder_slug = self.kwargs.get("folder_slug", None)
         files = File.objects.filter(
-            Q(owner__user__id=self.request.user.id) & Q(folder__name=None)
+            Q(owner__user__id=self.request.user.id) & Q(folder__slug=folder_slug)
         )
         folders = Folder.objects.filter(
-            Q(owner__user__id=self.request.user.id) & Q(parent_folder=None)
+            Q(owner__user__id=self.request.user.id) & Q(parent_folder__slug=folder_slug)
         )
-        folder_path = "home"
-        context = {"files": files, "folders": folders, "folder_path": folder_path}
+        if folder_slug:
+            current_folder = Folder.objects.get(slug=folder_slug)
+            folder_path = "home / " + current_folder.get_nested_path()
+        else:
+            folder_path = "home"
+        context = {
+            "files": files,
+            "folders": folders,
+            "folder_path": folder_path,
+            "folder_slug": folder_slug,
+        }
         return render(request, "filemanager/content-list.html", context)
 
 
