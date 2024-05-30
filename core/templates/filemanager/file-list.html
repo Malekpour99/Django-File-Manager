@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block css_links %}
+  <style>
+    tbody tr:hover td:hover {
+      background-color: #f0f0f0 !important;
+      cursor: pointer;
+    }
+  </style>
+{% endblock css_links %}
+
 {% block main_content %}
   <section class="h-100 w-100" style="background-color: #eee;">
     <div class="container py-2 h-100">
@@ -39,7 +48,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Size</th>
                     <th scope="col">Upload-Date</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" class="text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -51,9 +60,9 @@
                       <td class="col-5">
                         {{ file.name }}<p class="fw-light">{{ file.owner }}</p>
                       </td>
-                      <td class="col-1">{{ file.formatted_size }}</td>
+                      <td class="col-2">{{ file.formatted_size }}</td>
                       <td class="col-2">{{ file.created_at|date:'d M Y' }}</td>
-                      <td class="col-3">
+                      <td class="col-2 text-center">
                         <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
 
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
