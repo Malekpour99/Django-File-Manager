@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, DeleteView
 from .models import File
 from accounts.models import Profile
 
@@ -38,3 +38,13 @@ class FileUploadView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["files"] = File.objects.filter(owner__user=self.request.user)
         return context
+
+
+class FileDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Deleting specified file
+    """
+
+    model = File
+    template_name = "filemanager/file-list.html"
+    success_url = reverse_lazy("filemanager:home")
