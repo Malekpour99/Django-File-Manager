@@ -1,23 +1,29 @@
-from django.shortcuts import redirect
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.views.generic import ListView, CreateView, DeleteView
-from .models import File
+from django.views.generic import CreateView, DeleteView
+from django.db.models import Q
+
+from .models import File, Folder
 from accounts.models import Profile
 
 
-class FileListView(LoginRequiredMixin, ListView):
+class ContentView(LoginRequiredMixin, View):
     """
-    Showing list of files for the authenticated owner
+    Showing list of files and folders for the authenticated owner
     """
 
-    template_name = "filemanager/file-list.html"
-    context_object_name = "files"
-
-    def get_queryset(self):
-        files = File.objects.filter(owner__user__id=self.request.user.id)
-        return files
+    def get(self, request, *args, **kwargs):
+        files = File.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(folder__name=None)
+        )
+        folders = Folder.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(parent_folder=None)
+        )
+        folder_path = "home"
+        context = {"files": files, "folders": folders, "folder_path": folder_path}
+        return render(request, "filemanager/file-list.html", context)
 
 
 class FileUploadView(LoginRequiredMixin, CreateView):
