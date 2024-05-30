@@ -54,3 +54,13 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
     model = File
     template_name = "filemanager/content-list.html"
     success_url = reverse_lazy("filemanager:home")
+
+
+class FolderDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Deleting specified folder
+    """
+
+    model = Folder
+    template_name = "filemanager/content-list.html"
+    success_url = reverse_lazy("filemanager:home")
