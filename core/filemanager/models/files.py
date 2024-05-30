@@ -1,5 +1,8 @@
 from django.db import models
+from django.conf import settings
 from django.forms import ValidationError
+from django.dispatch import receiver
+from django.db.models.signals import post_delete
 from django.utils.translation import gettext_lazy as _
 
 import os
@@ -10,6 +13,9 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 
 from .base import BaseModel
 from .folders import Folder
+
+# Default Thumbnail for video files
+DEFAULT_THUMBNAIL_PATH = os.path.join(settings.BASE_DIR, 'static/img/default-video-thumbnail.png')
 
 
 # logger object
@@ -135,9 +141,18 @@ class File(BaseModel):
             logger.error(
                 f"Failed to create thumbnail for video {self.file.name}: {error}"
             )
-            default_thumbnail_path = "path/to/default/thumbnail.jpg"
-            self.thumbnail = default_thumbnail_path
+            self.thumbnail = DEFAULT_THUMBNAIL_PATH
             self.save()
 
     class Meta:
         unique_together = ("name", "folder", "owner")
+
+
+@receiver(post_delete, sender=File)
+def delete_file_on_model_delete(sender, instance, **kwargs):
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)
+    if instance.thumbnail:
+        if os.path.isfile(instance.thumbnail.path):
+            os.remove(instance.thumbnail.path)
