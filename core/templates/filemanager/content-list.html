@@ -74,8 +74,7 @@
                       <td class="col-2 text-center">
                         <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
 
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
-                      </td>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteFolderModal" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}"><i class="bi bi-trash-fill fs-5"></i></button>                      </td>
                     </tr>
                   {% endfor %}
                     
@@ -135,7 +134,7 @@
     </div>
   </div>
 
-  <!-- Delete Modal -->
+  <!-- Delete File Modal -->
   <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -157,6 +156,28 @@
     </div>
   </div>
 
+    <!-- Delete Folder Modal -->
+    <div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteFolderModalLabel">Delete Folder</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete the folder <strong id="folder-name"></strong>?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form method="post" id="delete-folder-form" action="">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
   <script>
     const deleteModal = document.getElementById('deleteModal')
     deleteModal.addEventListener('show.bs.modal', function (event) {
@@ -168,6 +189,18 @@
     
       modalFileName.textContent = fileName
       deleteForm.action = "{% url 'filemanager:delete-file' pk=0 %}".replace('0', fileId)
+    })
+
+    const deleteFolderModal = document.getElementById('deleteFolderModal')
+    deleteFolderModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget
+      const folderId = button.getAttribute('data-folder-id')
+      const folderName = button.getAttribute('data-folder-name')
+      const modalFolderName = deleteFolderModal.querySelector('#folder-name')
+      const deleteFolderForm = deleteFolderModal.querySelector('#delete-folder-form')
+
+      modalFolderName.textContent = folderName
+      deleteFolderForm.action = "{% url 'filemanager:delete-folder' pk=0 %}".replace('0', folderId)
     })
     
     var fileDetailsModal = document.getElementById('fileDetailsModal');
