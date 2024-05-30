@@ -44,8 +44,8 @@
                 </thead>
                 <tbody>
                   {% for file in files %}
-                    <tr>
-                      <td class="col-1 text-center">
+                  <tr data-bs-toggle="modal" data-bs-target="#fileDetailsModal" data-file-url="{{ file.file.url }}" data-file-name="{{ file.name }}" data-file-size="{{ file.formatted_size }}" data-file-owner="{{ file.owner }}" data-file-folder="{{ file.folder.name|default:'home' }}" data-file-upload-date="{{ file.created_at|date:'d M Y' }}" data-file-modified-date="{{ file.updated_at|date:'d M Y' }}">
+                    <td class="col-1 text-center">
                         <img src="{{ file.thumbnail.url }}" alt="{{ file.name }}" />
                       </td>
                       <td class="col-5">
@@ -68,6 +68,36 @@
       </div>
     </div>
   </section>
+
+  <!-- File Details Modal -->
+  <div class="modal fade" id="fileDetailsModal" tabindex="-1" aria-labelledby="fileDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fileDetailsModalLabel">File Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-12 text-center mb-2">
+              <img id="file-preview" class="img-fluid" alt="File Preview">
+            </div>
+            <div class="col-12">
+              <p><strong>Name:</strong> <span id="file-name"></span></p>
+              <p><strong>Size:</strong> <span id="file-size"></span></p>
+              <p><strong>Owner:</strong> <span id="file-owner"></span></p>
+              <p><strong>Folder:</strong> <span id="file-folder"></span></p>
+              <p><strong>Upload Date:</strong> <span id="file-upload-date"></span></p>
+              <p><strong>Modified Date:</strong> <span id="file-modified-date"></span></p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Delete Modal -->
   <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -103,5 +133,18 @@
       modalFileName.textContent = fileName
       deleteForm.action = "{% url 'filemanager:delete-file' pk=0 %}".replace('0', fileId)
     })
+    
+    var fileDetailsModal = document.getElementById('fileDetailsModal');
+    fileDetailsModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var modal = this;
+      modal.querySelector('#file-preview').src = button.getAttribute('data-file-url');
+      modal.querySelector('#file-name').textContent = button.getAttribute('data-file-name');
+      modal.querySelector('#file-size').textContent = button.getAttribute('data-file-size');
+      modal.querySelector('#file-owner').textContent = button.getAttribute('data-file-owner');
+      modal.querySelector('#file-folder').textContent = button.getAttribute('data-file-folder');
+      modal.querySelector('#file-upload-date').textContent = button.getAttribute('data-file-upload-date');
+      modal.querySelector('#file-modified-date').textContent = button.getAttribute('data-file-modified-date');
+    });
   </script>
 {% endblock %}
