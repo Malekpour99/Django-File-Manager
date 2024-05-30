@@ -41,6 +41,14 @@
               </form>
               <br />
 
+              <div class="row d-flex justify-content-center mb-2">
+                <div class="col-8">
+                  <div class="card border border-3">        
+                    <div class="card-body">{{ folder_path|title }}</div>
+                  </div>
+                </div>
+              </div>
+
               <table class="table mb-4">
                 <thead>
                   <tr>
@@ -52,9 +60,28 @@
                   </tr>
                 </thead>
                 <tbody>
+                  
+                  {% for folder in folders %}
+                    <tr>
+                      <td class="col-1 text-center">
+                        <img src="{% static 'img/folder-icon.png' %}" alt="{{ folder.name }}" />
+                      </td>
+                      <td class="col-5">
+                        {{ folder.name }}<p class="fw-light">{{ folder.owner }}</p>
+                      </td>
+                      <td class="col-2"></td>
+                      <td class="col-2">{{ folder.created_at|date:'d M Y' }}</td>
+                      <td class="col-2 text-center">
+                        <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
+
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                    
                   {% for file in files %}
-                  <tr data-bs-toggle="modal" data-bs-target="#fileDetailsModal" data-file-url="{{ file.file.url }}" data-file-name="{{ file.name }}" data-file-type="{{ file.type }}"  data-file-size="{{ file.formatted_size }}" data-file-owner="{{ file.owner }}" data-file-folder="{{ file.folder.name|default:'home' }}" data-file-upload-date="{{ file.created_at|date:'d M Y' }}" data-file-modified-date="{{ file.updated_at|date:'d M Y' }}">
-                    <td class="col-1 text-center">
+                    <tr data-bs-toggle="modal" data-bs-target="#fileDetailsModal" data-file-url="{{ file.file.url }}" data-file-name="{{ file.name }}" data-file-type="{{ file.type }}"  data-file-size="{{ file.formatted_size }}" data-file-owner="{{ file.owner }}" data-file-folder="{{ file.folder.name|default:'home' }}" data-file-upload-date="{{ file.created_at|date:'d M Y' }}" data-file-modified-date="{{ file.updated_at|date:'d M Y' }}">
+                      <td class="col-1 text-center">
                         <img src="{{ file.thumbnail.url }}" alt="{{ file.name }}" />
                       </td>
                       <td class="col-5">
