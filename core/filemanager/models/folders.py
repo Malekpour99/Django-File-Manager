@@ -41,7 +41,7 @@ class Folder(BaseModel):
         # Preventing creation of duplicate folders in the same parent
         count = 0
         while Folder.objects.filter(
-            name=self.name, parent_folder=self.parent_folder
+            name=self.name, parent_folder=self.parent_folder, owner=self.owner
         ).exists():
             count += 1
             if self.name[-1].isdigit():
