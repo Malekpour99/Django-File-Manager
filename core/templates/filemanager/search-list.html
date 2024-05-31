@@ -83,9 +83,11 @@
                       <td class="col-1"></td>
                       <td class="col-2">{{ folder.created_at|date:'d M Y' }}</td>
                       <td class="col-2 text-center">
-                        <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
-
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteFolderModal" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#renameFolderModal" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}">
+                          <i class="bi bi-pencil-square fs-5"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteFolderModal" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}">
+                          <i class="bi bi-trash-fill fs-5"></i>
                       </td>
                     </tr>
                   {% endfor %}
@@ -131,6 +133,8 @@
   
   {% include "filemanager/includes/delete-file-modal.html" %}
   
+  {% include "filemanager/includes/rename-folder-modal.html" %}
+
   {% include "filemanager/includes/delete-folder-modal.html" %}  
 
   <script>
@@ -156,6 +160,18 @@
     
       modalFileName.textContent = fileName
       deleteForm.action = "{% url 'filemanager:delete-file' pk=0 %}".replace('0', fileId)
+    })
+
+    const renameFolderModal = document.getElementById('renameFolderModal')
+    renameFolderModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget
+      const folderId = button.getAttribute('data-folder-id')
+      const folderName = button.getAttribute('data-folder-name')
+      const modalFolderName = renameFolderModal.querySelector('#folder-name')
+      const renameForm = renameFolderModal.querySelector('#rename-folder-form')
+      
+      modalFolderName.value = folderName
+      renameForm.action = "{% url 'filemanager:update-folder' pk=0 %}".replace('0', folderId)
     })
     
     const deleteFolderModal = document.getElementById('deleteFolderModal')
