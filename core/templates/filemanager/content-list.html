@@ -27,17 +27,20 @@
                   {% for field in form %}
                     {% if field.errors %}
                       {% for error in field.errors %}
-                        <p class="text-danger ps-5">{{ field.name|title }} - {{ error|escape }}</p>
+                        <p class="text-danger">{{ field.name|title }} - {{ error|escape }}</p>
                       {% endfor %}
                     {% endif %}
                   {% endfor %}
                 {% endif %}
                 {% if form.non_field_errors %}
                     {% for error in form.non_field_errors %}
-                        <p class="text-danger ps-5">{{ error|escape }}</p>
+                        <p class="text-danger">{{ error|escape }}</p>
                     {% endfor %}
                 {% endif %}
-                </div>
+                {% if form.errors %}
+                  <a href="{{ referer_url }}"><button type="button" class="btn btn-outline-secondary fs-3 mb-4">Click Here to return to previous page</button></a>
+                {% endif %}
+              </div>
               <div class="row">
                 <div class="col">
                   <form class="row g-1 text-center mb-2 pb-2" method="post" action="{% url 'filemanager:upload-file' %}" enctype="multipart/form-data">
