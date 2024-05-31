@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic import CreateView, DeleteView
@@ -46,23 +47,59 @@ class FileUploadView(LoginRequiredMixin, CreateView):
     template_name = "filemanager/content-list.html"
     model = File
     fields = ["file", "folder"]
-    success_url = reverse_lazy("filemanager:home")
 
     def form_valid(self, form):
         form.instance.owner = Profile.objects.get(user__id=self.request.user.id)
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        folder_slug = self.kwargs.get("folder_slug", None)
         context = super().get_context_data(**kwargs)
-        context["files"] = File.objects.filter(owner__user=self.request.user)
+        context["files"] = File.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(folder__slug=folder_slug)
+        )
+        context["folders"] = Folder.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(parent_folder__slug=folder_slug)
+        )
         return context
-    
+
     def get_success_url(self):
         # Redirecting user to the last page
         referer_url = self.request.META.get("HTTP_REFERER")
         if referer_url:
             return referer_url
         # fall back if referer_url was not available
+        return reverse_lazy("filemanager:home")
+
+
+class FolderCreateView(LoginRequiredMixin, CreateView):
+    """
+    Creating a new folder and dedicating this file to the current user
+    """
+
+    template_name = "filemanager/content-list.html"
+    model = Folder
+    fields = ["name", "parent_folder"]
+
+    def form_valid(self, form):
+        form.instance.owner = Profile.objects.get(user__id=self.request.user.id)
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        folder_slug = self.kwargs.get("folder_slug", None)
+        context = super().get_context_data(**kwargs)
+        context["files"] = File.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(folder__slug=folder_slug)
+        )
+        context["folders"] = Folder.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(parent_folder__slug=folder_slug)
+        )
+        return context
+
+    def get_success_url(self):
+        referer_url = self.request.META.get("HTTP_REFERER")
+        if referer_url:
+            return referer_url
         return reverse_lazy("filemanager:home")
 
 
