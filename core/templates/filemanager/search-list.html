@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css_links %}
+  <style>
+    tbody tr:hover td:hover {
+      background-color: #f0f0f0 !important;
+      cursor: pointer;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  </style>
+{% endblock %}
+
+{% block main_content %}
+  <section class="h-100 w-100" style="background-color: #eee;">
+    <div class="container py-2 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-lg-12 col-xl-12">
+          <div class="card rounded-3">
+            <div class="card-body p-4">
+              <h4 class="text-center my-3 pb-3">File Manager App</h4>
+              <div class="row">
+                <div class="col">
+                    <div class="text-center">
+                      <a href="{% url 'filemanager:home' %}">
+                        <button type="button" class="btn btn-outline-primary fs-5">Return Home</button>
+                      </a>
+                    </div>
+                </div>
+              </div>
+              <hr />
+              <div class="row mb-2">
+                <div class="col-7">
+                  <div class="card border border-3">
+                    <div class="card-body">{{ search_title }}</div>
+                  </div>
+                </div>
+                <!-- Serach Bar -->
+                <div class="col-5">
+                  <form class="row g-1" method="get" action="{% url 'filemanager:search' %}">
+                    <div class="col-10">
+                      <div class="form-outline">
+                        <input type="text" name="search" class="form-control p-3" placeholder="Search Files & Folders" />
+                      </div>
+                    </div>
+                    <div class="col-2">
+                      <button type="submit" class="btn btn-outline-secondary p-3 px-4"><i class="bi bi-search"></i></button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <hr/>
+
+              {% if folders or files %}
+              <table class="table mb-4">
+                <thead>
+                  <tr>
+                    <th scope="col">Preview</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Path</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Upload-Date</th>
+                    <th scope="col" class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                  
+                    
+                  {% for folder in folders %}
+                    <tr>
+                      <td class="col-1 text-center">
+                        <a href="{% url 'filemanager:folder-content' folder_slug=folder.slug %}"><img src="{% static 'img/folder-icon.png' %}" alt="{{ folder.name }}" /></a>
+                      </td>
+                      <td class="col-3">
+                        <a href="{% url 'filemanager:folder-content' folder_slug=folder.slug %}"><div>{{ folder.name }}</div><p class="fw-light">{{ folder.owner }}</p></a>
+                      </td>
+                      <td class="col-3">{% if folder.parent_folder %}Home / {% endif %}{{ folder.parent_folder.get_nested_path|default:"home"|title }}</td>
+                      <td class="col-1"></td>
+                      <td class="col-2">{{ folder.created_at|date:'d M Y' }}</td>
+                      <td class="col-2 text-center">
+                        <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
+
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteFolderModal" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
+                      </td>
+                    </tr>
+                  {% endfor %}
+
+                  {% for file in files %}
+                    <tr data-bs-toggle="modal" data-bs-target="#fileDetailsModal" data-file-url="{{ file.file.url }}" data-file-name="{{ file.name }}" data-file-type="{{ file.type }}" data-file-size="{{ file.formatted_size }}" data-file-owner="{{ file.owner }}" data-file-folder="{{ file.folder.name|default:'home' }}" data-file-upload-date="{{ file.created_at|date:'d M Y' }}" data-file-modified-date="{{ file.updated_at|date:'d M Y' }}">
+                      <td class="col-1 text-center">
+                        <img src="{{ file.thumbnail.url }}" alt="{{ file.name }}" />
+                      </td>
+                      <td class="col-3">
+                        {{ file.name }}<p class="fw-light">{{ file.owner }}</p>
+                      </td>
+                      <td class="col-3">{% if file.folder.parent_folder %}Home / {% endif %}{{ file.folder.get_nested_path|default:"home"|title }}</td>
+                      <td class="col-1">{{ file.formatted_size }}</td>
+                      <td class="col-2">{{ file.created_at|date:'d M Y' }}</td>
+                      <td class="col-2 text-center">
+                        <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
+
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              {% else %}
+              <div class="text-center text-danger-emphasis fs-4">
+                Sorry, We couldn't find anything!
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% include "filemanager/includes/file-details-modal.html" %}
+  
+  {% include "filemanager/includes/delete-file-modal.html" %}
+  
+  {% include "filemanager/includes/delete-folder-modal.html" %}  
+
+  <script>
+    const deleteModal = document.getElementById('deleteModal')
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget
+      const fileId = button.getAttribute('data-file-id')
+      const fileName = button.getAttribute('data-file-name')
+      const modalFileName = deleteModal.querySelector('#file-name')
+      const deleteForm = deleteModal.querySelector('#delete-form')
+    
+      modalFileName.textContent = fileName
+      deleteForm.action = "{% url 'filemanager:delete-file' pk=0 %}".replace('0', fileId)
+    })
+    
+    const deleteFolderModal = document.getElementById('deleteFolderModal')
+    deleteFolderModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget
+      const folderId = button.getAttribute('data-folder-id')
+      const folderName = button.getAttribute('data-folder-name')
+      const modalFolderName = deleteFolderModal.querySelector('#folder-name')
+      const deleteFolderForm = deleteFolderModal.querySelector('#delete-folder-form')
+    
+      modalFolderName.textContent = folderName
+      deleteFolderForm.action = "{% url 'filemanager:delete-folder' pk=0 %}".replace('0', folderId)
+    })
+    
+    var fileDetailsModal = document.getElementById('fileDetailsModal')
+    fileDetailsModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget
+      var modal = this
+      var mediaContainer = modal.querySelector('#media-container')
+      var fileType = button.getAttribute('data-file-type')
+      var fileUrl = button.getAttribute('data-file-url')
+      var fileName = button.getAttribute('data-file-name')
+      var fileSize = button.getAttribute('data-file-size')
+      var fileOwner = button.getAttribute('data-file-owner')
+      var fileFolder = button.getAttribute('data-file-folder')
+      var fileUploadDate = button.getAttribute('data-file-upload-date')
+      var fileModifiedDate = button.getAttribute('data-file-modified-date')
+    
+      if (fileType == 'video') {
+        mediaContainer.innerHTML = '<video controls style="max-width: 100%; max-height: 100%;"><source src="' + fileUrl + '" type="video/mp4">Your browser does not support the video tag.</video>'
+      } else {
+        mediaContainer.innerHTML = '<img src="' + fileUrl + '" alt="' + fileName + '" style="max-width: 100%; max-height: 100%;">'
+      }
+    
+      modal.querySelector('#file-name').textContent = fileName
+      modal.querySelector('#file-size').textContent = fileSize
+      modal.querySelector('#file-owner').textContent = fileOwner
+      modal.querySelector('#file-folder').textContent = fileFolder
+      modal.querySelector('#file-upload-date').textContent = fileUploadDate
+      modal.querySelector('#file-modified-date').textContent = fileModifiedDate
+    })
+  </script>
+{% endblock %}
