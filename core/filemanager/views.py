@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.http import HttpResponseRedirect
+from django.utils.http import is_safe_url
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic import CreateView, DeleteView
@@ -53,14 +53,14 @@ class FileUploadView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        folder_slug = self.kwargs.get("folder_slug", None)
         context = super().get_context_data(**kwargs)
-        context["files"] = File.objects.filter(
-            Q(owner__user__id=self.request.user.id) & Q(folder__slug=folder_slug)
-        )
-        context["folders"] = Folder.objects.filter(
-            Q(owner__user__id=self.request.user.id) & Q(parent_folder__slug=folder_slug)
-        )
+        referer_url = self.request.META.get("HTTP_REFERER")
+        if referer_url and is_safe_url(
+            url=referer_url, allowed_hosts={self.request.get_host()}
+        ):
+            context["referer_url"] = referer_url
+        else:
+            context["referer_url"] = reverse_lazy("filemanager:home")
         return context
 
     def get_success_url(self):
@@ -86,14 +86,14 @@ class FolderCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        folder_slug = self.kwargs.get("folder_slug", None)
         context = super().get_context_data(**kwargs)
-        context["files"] = File.objects.filter(
-            Q(owner__user__id=self.request.user.id) & Q(folder__slug=folder_slug)
-        )
-        context["folders"] = Folder.objects.filter(
-            Q(owner__user__id=self.request.user.id) & Q(parent_folder__slug=folder_slug)
-        )
+        referer_url = self.request.META.get("HTTP_REFERER")
+        if referer_url and is_safe_url(
+            url=referer_url, allowed_hosts={self.request.get_host()}
+        ):
+            context["referer_url"] = referer_url
+        else:
+            context["referer_url"] = reverse_lazy("filemanager:home")
         return context
 
     def get_success_url(self):
