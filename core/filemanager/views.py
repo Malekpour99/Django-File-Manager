@@ -65,7 +65,14 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
 
     model = File
     template_name = "filemanager/content-list.html"
-    success_url = reverse_lazy("filemanager:home")
+
+    def get_success_url(self):
+        # Redirecting user to the last page
+        referer_url = self.request.META.get("HTTP_REFERER")
+        if referer_url:
+            return referer_url
+        # fall back if referer_url was not available
+        return reverse_lazy("filemanager:home")
 
 
 class FolderDeleteView(LoginRequiredMixin, DeleteView):
