@@ -164,91 +164,11 @@
     </div>
   </section>
 
-  <!-- File Details Modal -->
-  <div class="modal fade" id="fileDetailsModal" tabindex="-1" aria-labelledby="fileDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="fileDetailsModalLabel">File Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-12 text-center mb-2" id="media-container">
-              <!-- Video or Image tag will be dynamically added here -->
-            </div>
-            <div class="col-12">
-              <p>
-                <strong>Name:</strong> <span id="file-name"></span>
-              </p>
-              <p>
-                <strong>Size:</strong> <span id="file-size"></span>
-              </p>
-              <p>
-                <strong>Owner:</strong> <span id="file-owner"></span>
-              </p>
-              <p>
-                <strong>Folder:</strong> <span id="file-folder"></span>
-              </p>
-              <p>
-                <strong>Upload Date:</strong> <span id="file-upload-date"></span>
-              </p>
-              <p>
-                <strong>Modified Date:</strong> <span id="file-modified-date"></span>
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delete File Modal -->
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteModalLabel">Delete File</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          Are you sure you want to delete the file <strong id="file-name"></strong>?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <form method="post" id="delete-form" action="">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delete Folder Modal -->
-  <div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-labelledby="deleteFolderModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteFolderModalLabel">Delete Folder</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          Are you sure you want to delete the folder <strong id="folder-name"></strong>?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <form method="post" id="delete-folder-form" action="">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Delete</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+  {% include "filemanager/includes/file-details-modal.html" %}
+  
+  {% include "filemanager/includes/delete-file-modal.html" %}
+  
+  {% include "filemanager/includes/delete-folder-modal.html" %}  
 
   <script>
     const deleteModal = document.getElementById('deleteModal')
