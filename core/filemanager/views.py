@@ -26,10 +26,12 @@ class ContentView(LoginRequiredMixin, View):
             current_folder = Folder.objects.get(slug=folder_slug)
             folder_path = "home / " + current_folder.get_nested_path()
         else:
+            current_folder = None
             folder_path = "home"
         context = {
             "files": files,
             "folders": folders,
+            "current_folder": current_folder,
             "folder_path": folder_path,
             "folder_slug": folder_slug,
         }
