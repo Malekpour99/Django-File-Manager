@@ -104,9 +104,9 @@ class File(BaseModel):
             self.size = self.file.size
         if not self.type:
             self.type = self.choose_file_type()
+        super().save(*args, **kwargs)
         if not self.thumbnail:
             self.create_thumbnail()
-        super().save(*args, **kwargs)
 
     def choose_file_type(self):
         mime_type, _ = mimetypes.guess_type(self.file.name)
