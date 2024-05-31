@@ -43,6 +43,18 @@
                   <button type="submit" class="btn btn-outline-primary">Upload</button>
                 </div>
               </form>
+              <form class="row g-3 text-center mb-4 pb-2" method="post" action="{% url 'filemanager:create-folder' %}">
+                {% csrf_token %}
+                <div class="col-9 ps-5">
+                  <div class="form-outline">
+                    <input type="text" id="task-title" name="name" class="form-control" placeholder="New Folder Name" />
+                    <input type="hidden" name="parent_folder" class="form-control" value="{% if current_folder %} {{ current_folder.id }} {% endif %}"/>
+                  </div>
+                </div>
+                <div class="d-grid col-3 pe-5">
+                  <button type="submit" class="btn btn-outline-primary">Create Folder</button>
+                </div>
+              </form>
               <br />
 
               <div class="row d-flex justify-content-center mb-2">
