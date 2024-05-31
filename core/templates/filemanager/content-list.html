@@ -22,15 +22,22 @@
           <div class="card rounded-3">
             <div class="card-body p-4">
               <h4 class="text-center my-3 pb-3">File Manager App</h4>
-              {% if form.errors %}
-                {% for field in form %}
-                  {% if field.errors %}
-                    {% for error in field.errors %}
-                      <p class="text-danger ps-5">{{ field.name|title }} - {{ error|escape }}</p>
+              <div class="row text-center">
+                {% if form.errors %}
+                  {% for field in form %}
+                    {% if field.errors %}
+                      {% for error in field.errors %}
+                        <p class="text-danger ps-5">{{ field.name|title }} - {{ error|escape }}</p>
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        <p class="text-danger ps-5">{{ error|escape }}</p>
                     {% endfor %}
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
+                {% endif %}
+                </div>
               <div class="row">
                 <div class="col">
                   <form class="row g-1 text-center mb-2 pb-2" method="post" action="{% url 'filemanager:upload-file' %}" enctype="multipart/form-data">
@@ -82,20 +89,20 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {% if folder_slug %}
+                  {% if current_folder %}
                     <tr>
                       <td class="col-1 text-center">
-                        {% if folder.parent_folder.slug %}
-                        <a href="{% url 'filemanager:folder-content' folder_slug=folder.parent_folder.slug %}">
+                        {% if current_folder.parent_folder.slug %}
+                        <a href="{% url 'filemanager:folder-content' folder_slug=current_folder.parent_folder.slug %}">
                         {% else %}
                         <a href="{% url 'filemanager:home' %}">
                         {% endif %}
-                          <img src="{% static 'img/return-icon.png' %}" alt="{{ folder.name }}" />
+                          <img src="{% static 'img/return-icon.png' %}" alt="{{ current_folder.name }}" />
                         </a>
                       </td>
                       <td class="col-5">
-                        {% if folder.parent_folder.slug %}
-                        <a href="{% url 'filemanager:folder-content' folder_slug=folder.parent_folder.slug %}">
+                        {% if current_folder.parent_folder.slug %}
+                        <a href="{% url 'filemanager:folder-content' folder_slug=current_folder.parent_folder.slug %}">
                         {% else %}
                         <a href="{% url 'filemanager:home' %}">
                         {% endif %}
