@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.utils.http import is_safe_url
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.views.generic import CreateView, DeleteView
+from django.views.generic import CreateView, UpdateView, DeleteView
 from django.db.models import Q
 
 from .models import File, Folder
@@ -103,6 +103,22 @@ class FolderCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy("filemanager:home")
 
 
+class FileUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Updating a file's name
+    """
+
+    template_name = "todo/update-task.html"
+    model = File
+    fields = ["name"]
+
+    def get_success_url(self):
+        referer_url = self.request.META.get("HTTP_REFERER")
+        if referer_url:
+            return referer_url
+        return reverse_lazy("filemanager:home")
+
+
 class FileDeleteView(LoginRequiredMixin, DeleteView):
     """
     Deleting specified file
@@ -131,6 +147,7 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
         if referer_url:
             return referer_url
         return reverse_lazy("filemanager:home")
+
 
 class SearchView(LoginRequiredMixin, View):
     """
