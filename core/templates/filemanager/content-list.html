@@ -73,13 +73,28 @@
               </div>
               <hr />
 
-              <div class="row d-flex justify-content-center mb-2">
-                <div class="col-8">
+              <div class="row mb-2">
+                <div class="col-7">
                   <div class="card border border-3">
                     <div class="card-body">{{ folder_path|title }}</div>
                   </div>
                 </div>
+                <!-- Serach Bar -->
+                <div class="col-5">
+                  <form class="row g-1" method="get" action="{% url 'filemanager:search' %}">
+                    <div class="col-10">
+                      <div class="form-outline">
+                        <input type="text" name="search" class="form-control p-3" placeholder="Search Files & Folders" />
+                      </div>
+                    </div>
+                    <div class="col-2">
+                      <button type="submit" class="btn btn-outline-secondary p-3 px-4"><i class="bi bi-search"></i></button>
+                    </div>
+                  </form>
+                </div>
               </div>
+
+              <hr />
 
               <table class="table mb-4">
                 <thead>
