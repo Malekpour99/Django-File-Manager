@@ -38,8 +38,6 @@ class Folder(BaseModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-            
-
         # Preventing creation of duplicate folders in the same parent
         count = 0
         while Folder.objects.filter(
