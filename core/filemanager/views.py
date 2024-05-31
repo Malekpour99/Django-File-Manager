@@ -19,10 +19,10 @@ class ContentView(LoginRequiredMixin, View):
         folder_slug = self.kwargs.get("folder_slug", None)
         files = File.objects.filter(
             Q(owner__user__id=self.request.user.id) & Q(folder__slug=folder_slug)
-        )
+        ).order_by("name")
         folders = Folder.objects.filter(
             Q(owner__user__id=self.request.user.id) & Q(parent_folder__slug=folder_slug)
-        )
+        ).order_by("name")
         if folder_slug:
             current_folder = Folder.objects.get(slug=folder_slug)
             folder_path = "home / " + current_folder.get_nested_path()
