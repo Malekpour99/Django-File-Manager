@@ -38,15 +38,17 @@ class Folder(BaseModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+            
+
         # Preventing creation of duplicate folders in the same parent
-        if Folder.objects.filter(
-            slug=self.slug, parent_folder=self.parent_folder
+        count = 0
+        while Folder.objects.filter(
+            name=self.name, parent_folder=self.parent_folder
         ).exists():
-            self.name += str(
-                Folder.objects.filter(
-                    slug=self.slug, parent_folder=self.parent_folder
-                ).count()
-            )
+            count += 1
+            if self.name[-1].isdigit():
+                self.name = self.name[:-1]
+            self.name += str(count)
         # Ensure the slug is unique for folders with the same name but different parents
         if Folder.objects.filter(slug=self.slug).exists():
             self.slug = f"{self.slug}-{uuid.uuid4().hex[:8]}"
