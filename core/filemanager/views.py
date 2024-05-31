@@ -45,7 +45,7 @@ class FileUploadView(LoginRequiredMixin, CreateView):
 
     template_name = "filemanager/content-list.html"
     model = File
-    fields = ["file"]
+    fields = ["file", "folder"]
     success_url = reverse_lazy("filemanager:home")
 
     def form_valid(self, form):
