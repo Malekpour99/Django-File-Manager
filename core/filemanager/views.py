@@ -131,3 +131,24 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
         if referer_url:
             return referer_url
         return reverse_lazy("filemanager:home")
+
+class SearchView(LoginRequiredMixin, View):
+    """
+    Searching files and folders for the authenticated owner
+    """
+
+    def get(self, request, *args, **kwargs):
+        search_query = self.request.GET.get("search", "")
+        files = File.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(name__contains=search_query)
+        ).order_by("name")
+        folders = Folder.objects.filter(
+            Q(owner__user__id=self.request.user.id) & Q(name__contains=search_query)
+        ).order_by("name")
+        search_title = "Search results for: " + '"' + search_query + '"'
+        context = {
+            "search_title": search_title,
+            "files": files,
+            "folders": folders,
+        }
+        return render(request, "filemanager/search-list.html", context)
