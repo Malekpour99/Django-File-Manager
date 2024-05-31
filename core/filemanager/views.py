@@ -56,6 +56,14 @@ class FileUploadView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["files"] = File.objects.filter(owner__user=self.request.user)
         return context
+    
+    def get_success_url(self):
+        # Redirecting user to the last page
+        referer_url = self.request.META.get("HTTP_REFERER")
+        if referer_url:
+            return referer_url
+        # fall back if referer_url was not available
+        return reverse_lazy("filemanager:home")
 
 
 class FileDeleteView(LoginRequiredMixin, DeleteView):
@@ -67,11 +75,9 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
     template_name = "filemanager/content-list.html"
 
     def get_success_url(self):
-        # Redirecting user to the last page
         referer_url = self.request.META.get("HTTP_REFERER")
         if referer_url:
             return referer_url
-        # fall back if referer_url was not available
         return reverse_lazy("filemanager:home")
 
 
@@ -82,11 +88,9 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
 
     model = Folder
     template_name = "filemanager/content-list.html"
-    
+
     def get_success_url(self):
-        # Redirecting user to the last page
         referer_url = self.request.META.get("HTTP_REFERER")
         if referer_url:
             return referer_url
-        # fall back if referer_url was not available
         return reverse_lazy("filemanager:home")
