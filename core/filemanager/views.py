@@ -108,7 +108,7 @@ class FileUpdateView(LoginRequiredMixin, UpdateView):
     Updating a file's name
     """
 
-    template_name = "todo/update-task.html"
+    template_name = "filemanager/content-list.html"
     model = File
     fields = ["name"]
 
@@ -126,6 +126,22 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
 
     model = File
     template_name = "filemanager/content-list.html"
+
+    def get_success_url(self):
+        referer_url = self.request.META.get("HTTP_REFERER")
+        if referer_url:
+            return referer_url
+        return reverse_lazy("filemanager:home")
+
+
+class FolderUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Updating a folder's name
+    """
+
+    template_name = "filemanager/content-list.html"
+    model = Folder
+    fields = ["name"]
 
     def get_success_url(self):
         referer_url = self.request.META.get("HTTP_REFERER")
