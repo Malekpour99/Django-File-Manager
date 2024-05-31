@@ -164,9 +164,12 @@
                       <td class="col-2">{{ file.formatted_size }}</td>
                       <td class="col-2">{{ file.created_at|date:'d M Y' }}</td>
                       <td class="col-2 text-center">
-                        <a type="button" class="btn btn-primary" href=""><i class="bi bi-pencil-square fs-5"></i></a>
-
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}"><i class="bi bi-trash-fill fs-5"></i></button>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#renameFileModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}">
+                          <i class="bi bi-pencil-square fs-5"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-file-id="{{ file.id }}" data-file-name="{{ file.name }}">
+                          <i class="bi bi-trash-fill fs-5"></i>
+                        </button>
                       </td>
                     </tr>
                   {% endfor %}
@@ -181,11 +184,25 @@
 
   {% include "filemanager/includes/file-details-modal.html" %}
   
+  {% include "filemanager/includes/rename-file-modal.html" %}
+
   {% include "filemanager/includes/delete-file-modal.html" %}
   
   {% include "filemanager/includes/delete-folder-modal.html" %}  
 
   <script>
+    const renameFileModal = document.getElementById('renameFileModal');
+    renameFileModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const fileId = button.getAttribute('data-file-id');
+      const fileName = button.getAttribute('data-file-name');
+      const modalFileNameInput = renameFileModal.querySelector('#file-name');
+      const renameForm = renameFileModal.querySelector('form');
+      
+      modalFileNameInput.value = fileName;
+      renameForm.action = "{% url 'filemanager:update-file' pk=0 %}".replace('0', fileId);
+    });
+
     const deleteModal = document.getElementById('deleteModal')
     deleteModal.addEventListener('show.bs.modal', function (event) {
       const button = event.relatedTarget
