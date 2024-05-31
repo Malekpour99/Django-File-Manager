@@ -1,16 +1,25 @@
 from django.db import models
 from django.utils.text import slugify
-from django.core.exceptions import ValidationError
+from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 import uuid
+import re
 
 from .base import BaseModel
 
 
+# Custom validator for name field
+def validate_name(value):
+    if re.search(r"[@#%$*&<>?|/:]", value):
+        raise ValidationError(
+            "Folder name can not contain invalid characters: @#%$*&<>?|/:"
+        )
+
+
 # Models
 class Folder(BaseModel):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, validators=[validate_name])
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     owner = models.ForeignKey(
         "accounts.Profile", on_delete=models.CASCADE, related_name="folders"
