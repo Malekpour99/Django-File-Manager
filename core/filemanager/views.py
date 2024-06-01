@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.http import is_safe_url
@@ -109,8 +110,10 @@ class FileUpdateView(LoginRequiredMixin, UpdateView):
     """
 
     template_name = "filemanager/content-list.html"
-    model = File
     fields = ["name"]
+
+    def get_queryset(self):
+        return File.objects.filter(owner__user__id=self.request.user.id)
 
     def get_success_url(self):
         referer_url = self.request.META.get("HTTP_REFERER")
@@ -124,8 +127,10 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
     Deleting specified file
     """
 
-    model = File
     template_name = "filemanager/content-list.html"
+
+    def get_queryset(self):
+        return File.objects.filter(owner__user__id=self.request.user.id)
 
     def get_success_url(self):
         referer_url = self.request.META.get("HTTP_REFERER")
@@ -140,8 +145,10 @@ class FolderUpdateView(LoginRequiredMixin, UpdateView):
     """
 
     template_name = "filemanager/content-list.html"
-    model = Folder
     fields = ["name"]
+
+    def get_queryset(self):
+        return Folder.objects.filter(owner__user__id=self.request.user.id)
 
     def get_success_url(self):
         referer_url = self.request.META.get("HTTP_REFERER")
@@ -155,8 +162,10 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
     Deleting specified folder
     """
 
-    model = Folder
     template_name = "filemanager/content-list.html"
+
+    def get_queryset(self):
+        return Folder.objects.filter(owner__user__id=self.request.user.id)
 
     def get_success_url(self):
         referer_url = self.request.META.get("HTTP_REFERER")
