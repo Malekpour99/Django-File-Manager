@@ -1,0 +1,35 @@
+# Make sure to use the "requirement.txt" file for building and running the project!
+
+# General Modules
+django>3.2,<3.3
+python-decouple
+pillow
+djangorestframework
+
+# Third-party Modules
+markdown
+django-filter
+drf-yasg[validation]
+djangorestframework-simplejwt
+django-cors-headers
+moviepy
+
+# Deployment
+gunicorn
+
+# Email
+django-mail-templated
+
+# Refactor & Test
+black
+flake8
+pytest
+pytest-django
+
+# Background Process & Cache
+celery
+redis
+django-redis
+
+# Fake Data
+Faker
