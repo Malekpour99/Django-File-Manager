@@ -115,17 +115,17 @@ class FileUpdateView(LoginRequiredMixin, UpdateView):
     def get_queryset(self):
         return File.objects.filter(owner__user__id=self.request.user.id)
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"new_name": form.instance.name})
+        return response
+
     def get_success_url(self):
         referer_url = self.request.META.get("HTTP_REFERER")
         if referer_url:
             return referer_url
         return reverse_lazy("filemanager:home")
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'new_name': form.instance.name})
-        return response
 
 
 class FileDeleteView(LoginRequiredMixin, DeleteView):
@@ -155,6 +155,12 @@ class FolderUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self):
         return Folder.objects.filter(owner__user__id=self.request.user.id)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"new_name": form.instance.name})
+        return response
 
     def get_success_url(self):
         referer_url = self.request.META.get("HTTP_REFERER")
