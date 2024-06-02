@@ -127,19 +127,20 @@ class File(BaseModel):
         image = Image.open(self.file)
         image.thumbnail(thumbnail_size, Image.LANCZOS)
         thumbnail_folder = "media/thumbnails"
-        thumbnail_dir = "thumbnails"
         os.makedirs(thumbnail_folder, exist_ok=True)
+        thumbnail_dir = "thumbnails"
         thumbnail_filename = os.path.basename(self.file.name)
         thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename)
-        image.save(thumbnail_path)
+        thumbnail_full_path = os.path.join("media/", thumbnail_path)
+        image.save(thumbnail_full_path)
         self.thumbnail = thumbnail_path
         self.save()
 
     def create_video_thumbnail(self):
         thumbnail_size = (100, 100)
         thumbnail_folder = "media/thumbnails"
-        thumbnail_dir = "thumbnails"
         os.makedirs(thumbnail_folder, exist_ok=True)
+        thumbnail_dir = "thumbnails"
         thumbnail_filename = os.path.basename(self.file.name)
         thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename + ".jpg")
         thumbnail_full_path = os.path.join("media/", thumbnail_path)
