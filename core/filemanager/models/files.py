@@ -53,6 +53,24 @@ def validate_file_type(value):
         raise ValidationError(
             _("Unsupported file type. Only videos and images are supported.")
         )
+    if mime_type and mime_type.startswith("image"):
+        try:
+            # Verify uploaded file is an image
+            image = Image.open(value)
+            image.verify()
+        except Exception:
+            raise ValidationError(
+                _("Unsupported file type. Your file is not a valid image.")
+            )
+    if mime_type and mime_type.startswith("video"):
+        try:
+            # Verify uploaded file is a video
+            clip = VideoFileClip(value.temporary_file_path())
+            clip.reader.close()  # Close the reader
+        except Exception:
+            raise ValidationError(
+                _("Unsupported file type. Your file is not a valid video.")
+            )
 
 
 # File size custom validator
