@@ -199,6 +199,17 @@ CACHES = {
     }
 }
 
+# Ensure the logs directory exists
+log_dir = os.path.join(BASE_DIR, "logs")
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+# Ensure the django.log file exists
+log_file = os.path.join(log_dir, "django.log")
+if not os.path.exists(log_file):
+    with open(log_file, 'w'):
+        pass
+
 # Logging configuration
 LOGGING = {
     "version": 1,
