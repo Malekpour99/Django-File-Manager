@@ -141,7 +141,7 @@
                         <a href="{% url 'filemanager:folder-content' folder_slug=folder.slug %}"><img src="{% static 'img/folder-icon.png' %}" alt="{{ folder.name }}" /></a>
                       </td>
                       <td class="col-5">
-                        <a href="{% url 'filemanager:folder-content' folder_slug=folder.slug %}"><div>{{ folder.name }}</div><p class="fw-light">{{ folder.owner }}</p></a>
+                        <a href="{% url 'filemanager:folder-content' folder_slug=folder.slug %}"><div id="folder-{{folder.id}}">{{ folder.name }}</div><p class="fw-light">{{ folder.owner }}</p></a>
                       </td>
                       <td class="col-2"></td>
                       <td class="col-2">{{ folder.created_at|date:'d M Y' }}</td>
