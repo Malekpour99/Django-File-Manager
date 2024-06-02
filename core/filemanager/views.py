@@ -1,5 +1,5 @@
-from django.db.models.query import QuerySet
 from django.shortcuts import render
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.http import is_safe_url
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -120,6 +120,12 @@ class FileUpdateView(LoginRequiredMixin, UpdateView):
         if referer_url:
             return referer_url
         return reverse_lazy("filemanager:home")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'new_name': form.instance.name})
+        return response
 
 
 class FileDeleteView(LoginRequiredMixin, DeleteView):
