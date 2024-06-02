@@ -7,13 +7,15 @@ import filemanager.models.folders
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('filemanager', '0002_file_type'),
+        ("filemanager", "0002_file_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='folder',
-            name='name',
-            field=models.CharField(max_length=255, validators=[filemanager.models.folders.validate_name]),
+            model_name="folder",
+            name="name",
+            field=models.CharField(
+                max_length=255, validators=[filemanager.models.folders.validate_name]
+            ),
         ),
     ]

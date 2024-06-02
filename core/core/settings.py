@@ -207,7 +207,7 @@ if not os.path.exists(log_dir):
 # Ensure the django.log file exists
 log_file = os.path.join(log_dir, "django.log")
 if not os.path.exists(log_file):
-    with open(log_file, 'w'):
+    with open(log_file, "w"):
         pass
 
 # Logging configuration
