@@ -61,6 +61,43 @@
       deleteForm.action = "{% url 'filemanager:delete-file' pk=0 %}".replace('0', fileId)
     });
 
+  document.addEventListener('DOMContentLoaded', function () {
+    const renameFolderForm = document.getElementById('rename-folder-form');
+  
+    renameFolderForm.addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const formData = new FormData(renameFolderForm);
+        const folderId = renameFolderForm.action.split('/').slice(-3, -2)[0]; // Extract folder ID from form action URL
+
+        fetch(renameFolderForm.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest', // Identify the request as AJAX
+            },
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Error renaming folder');
+            }
+        })
+        .then(data => {
+            // Update the folder name in the table
+            const folderNameCell = document.querySelector(`div[id="folder-${folderId}"]`);
+            folderNameCell.textContent = data.new_name;
+
+            // Close the modal
+            const renameFolderModal = bootstrap.Modal.getInstance(document.getElementById('renameFolderModal'));
+            renameFolderModal.hide();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+
     const renameFolderModal = document.getElementById('renameFolderModal')
     renameFolderModal.addEventListener('show.bs.modal', function (event) {
       const button = event.relatedTarget
@@ -72,6 +109,7 @@
       modalFolderName.value = folderName
       renameForm.action = "{% url 'filemanager:update-folder' pk=0 %}".replace('0', folderId)
     });
+  });
     
     const deleteFolderModal = document.getElementById('deleteFolderModal')
     deleteFolderModal.addEventListener('show.bs.modal', function (event) {
