@@ -157,12 +157,12 @@
                   {% endfor %}
 
                   {% for file in files %}
-                    <tr data-bs-toggle="modal" data-bs-target="#fileDetailsModal" data-file-url="{{ file.file.url }}" data-file-name="{{ file.name }}" data-file-type="{{ file.type }}" data-file-size="{{ file.formatted_size }}" data-file-owner="{{ file.owner }}" data-file-folder="{{ file.folder.name|default:'home' }}" data-file-upload-date="{{ file.created_at|date:'d M Y' }}" data-file-modified-date="{{ file.updated_at|date:'d M Y' }}">
+                    <tr data-bs-toggle="modal" data-bs-target="#fileDetailsModal" data-file-id="{{ file.id }}" data-file-url="{{ file.file.url }}" data-file-name="{{ file.name }}" data-file-type="{{ file.type }}" data-file-size="{{ file.formatted_size }}" data-file-owner="{{ file.owner }}" data-file-folder="{{ file.folder.name|default:'home' }}" data-file-upload-date="{{ file.created_at|date:'d M Y' }}" data-file-modified-date="{{ file.updated_at|date:'d M Y' }}">
                       <td class="col-1 text-center">
                         <img src="{{ file.thumbnail.url }}" alt="{{ file.name }}" />
                       </td>
                       <td class="col-5">
-                        {{ file.name }}<p class="fw-light">{{ file.owner }}</p>
+                        <div id="file-{{ file.id }}">{{ file.name }}</div><p class="fw-light">{{ file.owner }}</p>
                       </td>
                       <td class="col-2">{{ file.formatted_size }}</td>
                       <td class="col-2">{{ file.created_at|date:'d M Y' }}</td>
