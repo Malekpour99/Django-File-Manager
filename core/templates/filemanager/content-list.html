@@ -180,7 +180,7 @@
                 </tbody>
               </table>
               {% endif %}
-              {% if not folders and not files %}
+              {% if not folders and not files and not form.errors %}
               <div class="text-center fs-5">This folder is empty.</div>
               {% endif %}
             </div>
