@@ -29,8 +29,8 @@ services:
     depends_on:
       - redis
     environment:
-      SECRET_KEY: "django-insecure-&fnvrp83$x0zt0(s=53r4gv5h#1s-a)t-fuqo$1bq2nvl(h381"
-      DEBUG: True
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
 
   # Celery Worker
   worker:
