@@ -136,7 +136,6 @@
                       <td class="col-2 text-center"></td>
                     </tr>
                   {% endif %}
-
                   {% for folder in folders %}
                     <tr>
                       <td class="col-1 text-center">
@@ -180,6 +179,9 @@
                   {% endfor %}
                 </tbody>
               </table>
+              {% endif %}
+              {% if not folders and not files %}
+              <div class="text-center fs-5">This folder is empty.</div>
               {% endif %}
             </div>
           </div>
