@@ -58,6 +58,7 @@ def file(profile, folder):
 @pytest.fixture(autouse=True)
 def cleanup():
     yield
+    # Removing uploaded file during file upload test
     uploaded_file_path = "media/uploads/test.jpg"
     if os.path.exists(uploaded_file_path):
         os.remove(uploaded_file_path)
