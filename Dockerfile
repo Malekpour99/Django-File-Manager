@@ -10,3 +10,8 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
 
 COPY ./core /app/
+
+# Make entrypoint.sh executable
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
