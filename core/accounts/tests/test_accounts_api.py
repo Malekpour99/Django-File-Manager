@@ -71,7 +71,7 @@ class TestAccountsAPI:
         assert response.data["details"] == "password changed successfully"
 
     def test_custom_obtain_auth_token(self, api_client, create_user):
-        user = create_user("test@example.com", "password123")
+        create_user("test@example.com", "password123")
         url = reverse("accounts:token-login")
         data = {"email": "test@example.com", "password": "password123"}
         response = api_client.post(url, data, format="json")
@@ -80,14 +80,14 @@ class TestAccountsAPI:
 
     def test_custom_discard_auth_token(self, api_client, create_user):
         user = create_user("test@example.com", "password123")
-        token = Token.objects.create(user=user)
+        Token.objects.create(user=user)
         api_client.force_authenticate(user=user)
         url = reverse("accounts:token-logout")
         response = api_client.post(url, format="json")
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_activation_resend(self, api_client, create_user):
-        user = create_user("test@example.com", "password123", is_verified=False)
+        create_user("test@example.com", "password123", is_verified=False)
         url = reverse("accounts:activation-resend")
         data = {"email": "test@example.com"}
         response = api_client.post(url, data, format="json")
@@ -104,7 +104,7 @@ class TestAccountsAPI:
         assert response.data["email"] == user.email
 
     def test_reset_password(self, api_client, create_user):
-        user = create_user("test@example.com", "password123")
+        create_user("test@example.com", "password123")
         url = reverse("accounts:reset-password")
         data = {"email": "test@example.com"}
         response = api_client.post(url, data, format="json")
@@ -113,7 +113,6 @@ class TestAccountsAPI:
 
     def test_reset_password_confirm(self, api_client, create_user):
         user = create_user("test@example.com", "password123")
-        uid = user.pk
         url = reverse("accounts:reset-password-confirm")
         token = TokenHandler.get_tokens_for_user(user)
         data = {
