@@ -12,7 +12,7 @@ from PIL import Image
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 from .base import BaseModel
-from .folders import Folder
+from .folder import Folder
 
 # Default Thumbnail for video files
 DEFAULT_THUMBNAIL_PATH = os.path.join(
