@@ -11,7 +11,10 @@ services:
         protocol: tcp
 
   backend:
-    build: .
+    build:
+      context: .
+      args:
+        VENV_PATH: ${VENV_PATH}
     command: uv run python manage.py runserver 0.0.0.0:8000
     container_name: django-backend-service
     ports:
@@ -30,11 +33,14 @@ services:
     environment:
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG}
-      VIRTUAL_ENV: /opt/venv
+      VIRTUAL_ENV: ${VENV_PATH}
   
   # Celery Beat
   beat:
-    build: .
+    build:
+      context: .
+      args:
+        VENV_PATH: ${VENV_PATH}
     command: uv run celery -A core beat -l INFO
     volumes:
       - type: bind
@@ -46,11 +52,14 @@ services:
       - redis
       - backend
     environment:
-      VIRTUAL_ENV: /opt/venv
+      VIRTUAL_ENV: ${VENV_PATH}
 
   # Celery Worker
   worker:
-    build: .
+    build:
+      context: .
+      args:
+        VENV_PATH: ${VENV_PATH}
     command: uv run celery -A core worker -l INFO
     volumes:
       - type: bind
@@ -63,7 +72,7 @@ services:
       - backend
       - beat
     environment:
-      VIRTUAL_ENV: /opt/venv
+      VIRTUAL_ENV: ${VENV_PATH}
 
   smtp4dev:
     image: rnwood/smtp4dev:v3
