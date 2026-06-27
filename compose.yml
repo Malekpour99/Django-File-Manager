@@ -33,6 +33,7 @@ services:
     environment:
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG}
+      LOG_LEVEL: ${LOG_LEVEL}
       VIRTUAL_ENV: ${VENV_PATH}
   
   # Celery Beat
@@ -52,6 +53,7 @@ services:
       - redis
       - backend
     environment:
+      LOG_LEVEL: ${LOG_LEVEL}
       VIRTUAL_ENV: ${VENV_PATH}
 
   # Celery Worker
@@ -72,6 +74,7 @@ services:
       - backend
       - beat
     environment:
+      LOG_LEVEL: ${LOG_LEVEL}
       VIRTUAL_ENV: ${VENV_PATH}
 
   smtp4dev:
