@@ -12,9 +12,8 @@ services:
 
   backend:
     build: .
+    command: uv run python manage.py runserver 0.0.0.0:8000
     container_name: django-backend-service
-    command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000 & celery -A core beat"
     ports:
       - mode: ingress
         target: 8000
@@ -22,7 +21,7 @@ services:
         protocol: tcp
     volumes:
       - type: bind
-        source: ./core
+        source: ./app
         target: /app
         bind:
           create_host_path: true
@@ -31,20 +30,40 @@ services:
     environment:
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG}
-
-  # Celery Worker
-  worker:
+      VIRTUAL_ENV: /opt/venv
+  
+  # Celery Beat
+  beat:
     build: .
-    command: celery -A core worker -l INFO
+    command: uv run celery -A core beat -l INFO
     volumes:
       - type: bind
-        source: ./core
+        source: ./app
         target: /app
         bind:
           create_host_path: true
     depends_on:
       - redis
       - backend
+    environment:
+      VIRTUAL_ENV: /opt/venv
+
+  # Celery Worker
+  worker:
+    build: .
+    command: uv run celery -A core worker -l INFO
+    volumes:
+      - type: bind
+        source: ./app
+        target: /app
+        bind:
+          create_host_path: true
+    depends_on:
+      - redis
+      - backend
+      - beat
+    environment:
+      VIRTUAL_ENV: /opt/venv
 
   smtp4dev:
     image: rnwood/smtp4dev:v3

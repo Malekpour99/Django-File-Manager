@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.urls import reverse_lazy
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.views.generic import CreateView, UpdateView, DeleteView
@@ -56,7 +56,7 @@ class FileUploadView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         referer_url = self.request.META.get("HTTP_REFERER")
-        if referer_url and is_safe_url(
+        if referer_url and url_has_allowed_host_and_scheme(
             url=referer_url, allowed_hosts={self.request.get_host()}
         ):
             context["referer_url"] = referer_url
@@ -89,7 +89,7 @@ class FolderCreateView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         referer_url = self.request.META.get("HTTP_REFERER")
-        if referer_url and is_safe_url(
+        if referer_url and url_has_allowed_host_and_scheme(
             url=referer_url, allowed_hosts={self.request.get_host()}
         ):
             context["referer_url"] = referer_url
