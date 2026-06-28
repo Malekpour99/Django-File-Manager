@@ -1,8 +1,8 @@
 # Django-File-Manager
 
-This a file manager project created by using Django and template rendering approach
+A file manager project built with Django and template rendering.
 
-## Configurations
+## Features
 
 - Customized user and profile
 - Uploading images and videos
@@ -16,30 +16,62 @@ This a file manager project created by using Django and template rendering appro
 - Customized caching based on Redis
 - smtp4dev development mailing service
 
-### Project Setup
+## Prerequisites
 
-create a `.env` file from `.env.example` and update environment variables with your own values,
-then run below commands:
+- [Docker](https://docs.docker.com/get-docker/) & Docker Compose
+- `make` (pre-installed on Linux/macOS; Windows users can use [WSL](https://learn.microsoft.com/en-us/windows/wsl/) or [Make for Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
 
-```sh
-docker compose up -d
-docker compose exec backend sh -c "python manage.py migrate"
-```
-
-This will set you up for using this project.
-
-### Creating a super-user
+## Quick Start
 
 ```sh
-docker compose exec backend sh -c "python manage.py createsuperuser"
+make setup   # copies .env.example → .env (edit it with your values first)
+make build   # build Docker images
+make up      # start all services
+make migrate # run database migrations
 ```
 
-By creating super-user you can login with the super-user credentials and also access the admin-panel.
+## Available Make Commands
 
-### For running tests
+| Command          | Description                                      |
+| ---------------- | ------------------------------------------------ |
+| `make help`      | List all available commands                      |
+| `make setup`     | Copy `.env.example` to `.env` (first-time setup) |
+| `make build`     | Build Docker images                              |
+| `make up`        | Start all services in detached mode              |
+| `make down`      | Stop and remove containers                       |
+| `make restart`   | Restart all services                             |
+| `make logs`      | Tail logs for all services                       |
+| `make migrate`   | Run database migrations                          |
+| `make superuser` | Create a Django superuser                        |
+| `make test`      | Run the test suite                               |
+| `make lint`      | Run ruff linter                                  |
+| `make shell`     | Open a Django shell                              |
+| `make clean`     | Stop containers and remove volumes               |
+
+## Configuration
+
+Edit the generated `.env` file with your own values before starting the project. Refer to `.env.example` for available options.
+
+## Creating a Superuser
 
 ```sh
-docker compose exec backend sh -c "pytest ."
+make superuser
 ```
 
-You test the functionality and performance of the project by using created tests and also adding your tests as well.
+Log in with superuser credentials to access the Django admin panel at `/admin/`.
+
+## Running Tests
+
+```sh
+make test
+```
+
+Add your own tests alongside the existing ones to extend coverage.
+
+## Linting
+
+```sh
+make lint
+```
+
+Uses [ruff](https://docs.astral.sh/ruff/) for fast Python linting.
