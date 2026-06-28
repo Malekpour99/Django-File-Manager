@@ -18,7 +18,7 @@ This a file manager project created by using Django and template rendering appro
 
 ### Project Setup
 
-create a `.env` file from `.env.example` and fill it with your own values,
+create a `.env` file from `.env.example` and update environment variables with your own values,
 then run below commands:
 
 ```sh
