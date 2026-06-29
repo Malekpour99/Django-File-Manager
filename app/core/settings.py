@@ -22,6 +22,9 @@ ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")], default="*"
 )
 
+# Redis
+REDIS_CACHE_URL = config("REDIS_CACHE_URL", default="redis://redis:6379/2")
+
 
 # Application definition
 
@@ -171,13 +174,13 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Celery Configuration
-CELERY_BROKER_URL = "redis://redis:6379/1"
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://redis:6379/1")
 
 # Caching configuration
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/2",
+        "LOCATION": REDIS_CACHE_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
