@@ -38,7 +38,7 @@ restart:
 	docker compose restart
 
 logs:
-	docker compose logs -f
+	docker compose logs -f $(service)
 
 migrate:
 	docker compose exec backend uv run python manage.py migrate

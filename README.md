@@ -32,21 +32,22 @@ make migrate # run database migrations
 
 ## Available Make Commands
 
-| Command          | Description                                      |
-| ---------------- | ------------------------------------------------ |
-| `make help`      | List all available commands                      |
-| `make setup`     | Copy `.env.example` to `.env` (first-time setup) |
-| `make build`     | Build Docker images                              |
-| `make up`        | Start all services in detached mode              |
-| `make down`      | Stop and remove containers                       |
-| `make restart`   | Restart all services                             |
-| `make logs`      | Tail logs for all services                       |
-| `make migrate`   | Run database migrations                          |
-| `make superuser` | Create a Django superuser                        |
-| `make test`      | Run the test suite                               |
-| `make lint`      | Run ruff linter                                  |
-| `make shell`     | Open a Django shell                              |
-| `make clean`     | Stop containers and remove volumes               |
+| Command                    | Description                                      |
+| -------------------------- | ------------------------------------------------ |
+| `make help`                | List all available commands                      |
+| `make setup`               | Copy `.env.example` to `.env` (first-time setup) |
+| `make build`               | Build Docker images                              |
+| `make up`                  | Start all services in detached mode              |
+| `make down`                | Stop and remove containers                       |
+| `make restart`             | Restart all services                             |
+| `make logs`                | Tail logs for all services                       |
+| `make logs service=<name>` | Tail logs for a specific service                 |
+| `make migrate`             | Run database migrations                          |
+| `make superuser`           | Create a Django superuser                        |
+| `make test`                | Run the test suite                               |
+| `make lint`                | Run ruff linter                                  |
+| `make shell`               | Open a Django shell                              |
+| `make clean`               | Stop containers and remove volumes               |
 
 ## Configuration
 
