@@ -46,6 +46,11 @@ services:
       DEBUG: ${DEBUG}
       LOG_LEVEL: ${LOG_LEVEL}
       VIRTUAL_ENV: ${VENV_PATH}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
   
   # Celery Beat
   beat:
@@ -66,6 +71,11 @@ services:
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
       VIRTUAL_ENV: ${VENV_PATH}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
 
   # Celery Worker
   worker:
@@ -87,6 +97,11 @@ services:
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
       VIRTUAL_ENV: ${VENV_PATH}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
 
   smtp4dev:
     image: rnwood/smtp4dev:v3
