@@ -2,11 +2,14 @@ import io
 import logging
 import os
 import tempfile
+from typing import Optional
 
 from django.db import models
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.forms import ValidationError
 from django.dispatch import receiver
+from django.db.models.fields.files import FieldFile
 from django.db.models.signals import post_delete
 from django.utils.translation import gettext_lazy as _
 
@@ -158,7 +161,7 @@ class File(BaseModel):
         self.thumbnail.save(
             thumbnail_name, ContentFile(thumb_io.getvalue()), save=False
         )
-        
+
         self.save()
 
     def create_video_thumbnail(self):
@@ -185,9 +188,7 @@ class File(BaseModel):
                 thumb_io.seek(0)
 
                 # Use original filename for thumbnail with .jpg extension
-                thumbnail_name = self.get_thumbnail_name(
-                    self.file.name, force_jpg=True
-                )
+                thumbnail_name = self.get_thumbnail_name(self.file.name, force_jpg=True)
 
                 # Save thumbnail to MinIO
                 self.thumbnail.save(
@@ -198,7 +199,7 @@ class File(BaseModel):
                 f"Failed to create thumbnail for video {self.file.name}: {error}"
             )
             self.thumbnail = DEFAULT_THUMBNAIL_PATH
-    
+
         self.save()
 
     class Meta:
@@ -207,9 +208,16 @@ class File(BaseModel):
 
 @receiver(post_delete, sender=File)
 def delete_file_on_model_delete(sender, instance, **kwargs):
-    if instance.file:
-        if os.path.isfile(instance.file.path):
-            os.remove(instance.file.path)
-    if instance.thumbnail:
-        if os.path.isfile(instance.thumbnail.path):
-            os.remove(instance.thumbnail.path)
+    delete_file_from_storage(
+        file_field=instance.file
+    )  # Get the relative path of the file
+    delete_file_from_storage(
+        file_field=instance.thumbnail
+    )  # Delete thumbnail if it exists
+
+
+def delete_file_from_storage(*, file_field: Optional[FieldFile]):
+    if file_field:
+        file_path = file_field.name
+        if default_storage.exists(file_path):
+            default_storage.delete(file_path)
