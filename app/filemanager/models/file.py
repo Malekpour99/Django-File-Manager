@@ -1,12 +1,15 @@
+import io
+import logging
+import os
+import tempfile
+
 from django.db import models
-from django.conf import settings
+from django.core.files.base import ContentFile
 from django.forms import ValidationError
 from django.dispatch import receiver
 from django.db.models.signals import post_delete
 from django.utils.translation import gettext_lazy as _
 
-import os
-import logging
 import mimetypes
 from PIL import Image
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -15,9 +18,8 @@ from .base import BaseModel
 from .folder import Folder
 
 # Default Thumbnail for video files
-DEFAULT_THUMBNAIL_PATH = os.path.join(
-    settings.BASE_DIR, "static/img/default-video-thumbnail.png"
-)
+DEFAULT_THUMBNAIL_SIZE = (100, 100)
+DEFAULT_THUMBNAIL_PATH = "static/img/default-video-thumbnail.png"
 
 #
 FILE_TYPE_CHOICES = [
@@ -83,7 +85,6 @@ def validate_file_size(value):
         )
 
 
-# Model
 class File(BaseModel):
     name = models.CharField(max_length=255, blank=True)
     file = models.FileField(
@@ -141,46 +142,64 @@ class File(BaseModel):
             self.create_video_thumbnail()
 
     def create_image_thumbnail(self):
-        thumbnail_size = (100, 100)
+        thumbnail_size = DEFAULT_THUMBNAIL_SIZE
         image = Image.open(self.file)
         image.thumbnail(thumbnail_size, Image.LANCZOS)
-        thumbnail_folder = "media/thumbnails"
-        os.makedirs(thumbnail_folder, exist_ok=True)
-        thumbnail_dir = "thumbnails"
-        thumbnail_filename = os.path.basename(self.file.name)
-        thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename)
-        thumbnail_full_path = os.path.join("media/", thumbnail_path)
-        image.save(thumbnail_full_path)
-        self.thumbnail = thumbnail_path
+
+        # Convert image to bytes
+        thumb_io = io.BytesIO()
+        image.save(thumb_io, format="JPEG")
+        thumb_io.seek(0)
+
+        # Use original filename for thumbnail
+        thumbnail_name = self.get_thumbnail_name(self.file.name)
+
+        # Save thumbnail to MinIO using Django's storage
+        self.thumbnail.save(
+            thumbnail_name, ContentFile(thumb_io.getvalue()), save=False
+        )
+        
         self.save()
 
     def create_video_thumbnail(self):
-        thumbnail_size = (100, 100)
-        thumbnail_folder = "media/thumbnails"
-        os.makedirs(thumbnail_folder, exist_ok=True)
-        thumbnail_dir = "thumbnails"
-        thumbnail_filename = os.path.basename(self.file.name)
-        thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename + ".jpg")
-        thumbnail_full_path = os.path.join("media/", thumbnail_path)
-        file_path = self.file.path
+        thumbnail_size = DEFAULT_THUMBNAIL_SIZE
         try:
-            clip = VideoFileClip(file_path)
-            frame = clip.get_frame(1)  # Capture frame at 1 second
-            clip.close()
+            # Create a temporary file to process the video
+            with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_video:
+                # Read video from MinIO and write to temp file
+                for chunk in self.file.chunks():
+                    temp_video.write(chunk)
+                temp_video.flush()
 
-            thumbnail = Image.fromarray(frame)
-            thumbnail.thumbnail(thumbnail_size)
+                # Process video and create thumbnail
+                clip = VideoFileClip(temp_video.name)
+                frame = clip.get_frame(1)
+                clip.close()
 
-            thumbnail.save(thumbnail_full_path)
+                thumbnail = Image.fromarray(frame)
+                thumbnail.thumbnail(thumbnail_size)
 
-            self.thumbnail = thumbnail_path
-            self.save()
+                # Convert thumbnail to bytes
+                thumb_io = io.BytesIO()
+                thumbnail.save(thumb_io, format="JPEG")
+                thumb_io.seek(0)
+
+                # Use original filename for thumbnail with .jpg extension
+                thumbnail_name = self.get_thumbnail_name(
+                    self.file.name, force_jpg=True
+                )
+
+                # Save thumbnail to MinIO
+                self.thumbnail.save(
+                    thumbnail_name, ContentFile(thumb_io.getvalue()), save=False
+                )
         except Exception as error:
             logger.error(
                 f"Failed to create thumbnail for video {self.file.name}: {error}"
             )
             self.thumbnail = DEFAULT_THUMBNAIL_PATH
-            self.save()
+    
+        self.save()
 
     class Meta:
         unique_together = ("name", "folder", "owner")
