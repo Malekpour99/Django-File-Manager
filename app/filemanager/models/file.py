@@ -130,6 +130,19 @@ class File(BaseModel):
         if not self.thumbnail:
             self.create_thumbnail()
 
+    def get_thumbnail_name(self, original_filename, force_jpg=False):
+        """
+        Generate thumbnail name based on original filename
+
+        Args:
+            original_filename (str): Original file name
+            force_jpg (bool): Force .jpg extension for non-image files
+        """
+        base_name = os.path.basename(original_filename)
+        if force_jpg:
+            base_name = os.path.splitext(base_name)[0] + ".jpg"
+        return base_name
+
     def choose_file_type(self):
         mime_type, _ = mimetypes.guess_type(self.file.name)
         if mime_type.startswith("image"):
@@ -147,6 +160,11 @@ class File(BaseModel):
     def create_image_thumbnail(self):
         thumbnail_size = DEFAULT_THUMBNAIL_SIZE
         image = Image.open(self.file)
+
+        # Convert images with transparency to RGB
+        if image.mode in ("RGBA", "LA", "P"):
+            image = image.convert("RGB")
+        
         image.thumbnail(thumbnail_size, Image.LANCZOS)
 
         # Convert image to bytes
