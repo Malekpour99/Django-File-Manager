@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "accounts",
     "filemanager",
     "corsheaders",
+    "minio_storage",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
@@ -133,9 +134,16 @@ MEDIA_URL = "media/"
 
 STATICFILES_DIRS = [BASE_DIR / "statics"]
 
+STORAGES = {
+    "default": {
+        "BACKEND": "minio_storage.storage.MinioMediaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "minio_storage.storage.MinioStaticStorage",
+    },
+}
+
 # Minio - global config
-DEFAULT_FILE_STORAGE = "minio_storage.storage.MinioMediaStorage"
-STATICFILES_STORAGE = "minio_storage.storage.MinioStaticStorage"
 MINIO_STORAGE_ENDPOINT = config("MINIO_STORAGE_ENDPOINT")
 MINIO_EXTERNAL_STORAGE_ENDPOINT = config("MINIO_EXTERNAL_STORAGE_ENDPOINT")
 
