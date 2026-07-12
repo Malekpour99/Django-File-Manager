@@ -1,7 +1,8 @@
 FROM python:3.13-alpine
 
 # Install uv and uvx binaries from the Astral SH GitHub Container Registry
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN pip install uv
 
 # Set up environment variables for the virtual environment and Python settings
 ARG VENV_PATH=/opt/venv
