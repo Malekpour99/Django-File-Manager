@@ -41,8 +41,6 @@ services:
   backend:
     build:
       context: .
-      args:
-        VENV_PATH: ${VENV_PATH}
     command: uv run python manage.py runserver 0.0.0.0:8000
     container_name: django-backend-service
     ports:
@@ -75,8 +73,6 @@ services:
   beat:
     build:
       context: .
-      args:
-        VENV_PATH: ${VENV_PATH}
     command: uv run celery -A core beat -l INFO
     volumes:
       - type: bind
@@ -100,8 +96,6 @@ services:
   worker:
     build:
       context: .
-      args:
-        VENV_PATH: ${VENV_PATH}
     command: uv run celery -A core worker -l INFO
     volumes:
       - type: bind
