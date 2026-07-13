@@ -24,13 +24,11 @@ from .folder import Folder
 DEFAULT_THUMBNAIL_SIZE = (100, 100)
 DEFAULT_THUMBNAIL_PATH = "static/img/default-video-thumbnail.png"
 
-#
 FILE_TYPE_CHOICES = [
     ("video", "Video"),
     ("image", "Image"),
 ]
 
-# logger object
 logger = logging.getLogger(__name__)
 
 
