@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "accounts",
     "filemanager",
     "corsheaders",
+    "minio_storage",
     "rest_framework",
     "rest_framework.authtoken",
     "rest_framework_simplejwt",
@@ -128,15 +129,53 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = "static/"
 MEDIA_URL = "media/"
 
-STATIC_ROOT = BASE_DIR / "static"
-MEDIA_ROOT = BASE_DIR / "media"
-
 STATICFILES_DIRS = [BASE_DIR / "statics"]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "minio_storage.storage.MinioMediaStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "minio_storage.storage.MinioStaticStorage",
+    },
+}
+
+# Minio - global config
+MINIO_STORAGE_ENDPOINT = config("MINIO_STORAGE_ENDPOINT")
+MINIO_EXTERNAL_STORAGE_ENDPOINT = config("MINIO_EXTERNAL_STORAGE_ENDPOINT")
+
+# Minio - security config
+MINIO_STORAGE_ACCESS_KEY = config("MINIO_STORAGE_ACCESS_KEY")
+MINIO_STORAGE_SECRET_KEY = config("MINIO_STORAGE_SECRET_KEY")
+MINIO_STORAGE_USE_HTTPS = config("MINIO_STORAGE_USE_HTTPS", cast=bool)
+
+# Minio - media files config
+MINIO_STORAGE_MEDIA_BUCKET_NAME = config(
+    "MINIO_STORAGE_MEDIA_BUCKET_NAME", default="media"
+)
+MINIO_STORAGE_MEDIA_USE_PRESIGNED = True
+MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = True
+
+# Minio - static files config
+MINIO_STORAGE_STATIC_BUCKET_NAME = config(
+    "MINIO_STORAGE_STATIC_BUCKET_NAME", default="static"
+)
+MINIO_STORAGE_STATIC_USE_PRESIGNED = False
+MINIO_STORAGE_AUTO_CREATE_STATIC_BUCKET = True
+
+# changing base url schema for static and media serve
+# by default in dev mode it will look for localhost port 9000 you can configure another when using online
+MINIO_STORAGE_STATIC_URL = config(
+    "MINIO_STORAGE_STATIC_URL",
+    f"{MINIO_EXTERNAL_STORAGE_ENDPOINT}/{MINIO_STORAGE_STATIC_BUCKET_NAME}",
+)
+MINIO_STORAGE_MEDIA_URL = config(
+    "MINIO_STORAGE_MEDIA_URL",
+    f"{MINIO_EXTERNAL_STORAGE_ENDPOINT}/{MINIO_STORAGE_MEDIA_BUCKET_NAME}",
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

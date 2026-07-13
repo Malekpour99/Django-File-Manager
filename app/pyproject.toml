@@ -10,6 +10,7 @@ dependencies = [
     "django-cors-headers>=4.9.0",
     "django-filter>=25.2",
     "django-mail-templated>=2.6.5",
+    "django-minio-storage>=0.5.9",
     "django-redis>=7.0.0",
     "djangorestframework>=3.17.1",
     "djangorestframework-simplejwt>=5.5.1",

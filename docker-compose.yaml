@@ -1,15 +1,29 @@
 services:
-
   redis:
     image: redis
     container_name: redis-service
     command: redis-server --save 60 1 --loglevel warning
     ports:
-      - mode: ingress
-        target: 6379
-        published: 6379
-        protocol: tcp
-  
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_STORAGE_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_STORAGE_SECRET_KEY}
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
   db:
     image: postgres:16
     environment:
@@ -24,94 +38,55 @@ services:
   backend:
     build:
       context: .
-      args:
-        VENV_PATH: ${VENV_PATH}
     command: uv run python manage.py runserver 0.0.0.0:8000
     container_name: django-backend-service
     ports:
-      - mode: ingress
-        target: 8000
-        published: 8000
-        protocol: tcp
+      - "8000:8000"
     volumes:
-      - type: bind
-        source: ./app
-        target: /app
-        bind:
-          create_host_path: true
+      - ./app:/app
     depends_on:
+      - db
       - redis
-    environment:
-      SECRET_KEY: ${SECRET_KEY}
-      DEBUG: ${DEBUG}
-      LOG_LEVEL: ${LOG_LEVEL}
-      VIRTUAL_ENV: ${VENV_PATH}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-  
+      - minio
+    env_file:
+      - .env
+
   # Celery Beat
   beat:
     build:
       context: .
-      args:
-        VENV_PATH: ${VENV_PATH}
     command: uv run celery -A core beat -l INFO
     volumes:
-      - type: bind
-        source: ./app
-        target: /app
-        bind:
-          create_host_path: true
+      - ./app:/app
     depends_on:
       - redis
       - backend
-    environment:
-      LOG_LEVEL: ${LOG_LEVEL}
-      VIRTUAL_ENV: ${VENV_PATH}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+    env_file:
+      - .env
 
   # Celery Worker
   worker:
     build:
       context: .
-      args:
-        VENV_PATH: ${VENV_PATH}
     command: uv run celery -A core worker -l INFO
     volumes:
-      - type: bind
-        source: ./app
-        target: /app
-        bind:
-          create_host_path: true
+      - ./app:/app
     depends_on:
       - redis
       - backend
       - beat
-    environment:
-      LOG_LEVEL: ${LOG_LEVEL}
-      VIRTUAL_ENV: ${VENV_PATH}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+    env_file:
+      - .env
 
   smtp4dev:
     image: rnwood/smtp4dev:v3
     ports:
       # Change the number before : to the port the web interface should be accessible on
-      - '5000:80'
+      - "5000:80"
       # Change the number before : to the port the SMTP server should be accessible on
-      - '25:25'
+      - "25:25"
       # Change the number before : to the port the IMAP server should be accessible on
-      - '143:143'
+      - "143:143"
     volumes:
       # where smtp4dev stores the database
       - smtp4dev-data:/smtp4dev
@@ -122,3 +97,4 @@ services:
 volumes:
   smtp4dev-data:
   postgres-data:
+  minio-data:
