@@ -58,9 +58,12 @@ services:
     volumes:
       - ./app:/app
     depends_on:
-      - db
-      - redis
-      - minio
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
     env_file:
       - .env
     restart: unless-stopped
@@ -73,8 +76,10 @@ services:
     volumes:
       - ./app:/app
     depends_on:
-      - redis
-      - backend
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
     env_file:
       - .env
     restart: unless-stopped
@@ -87,9 +92,12 @@ services:
     volumes:
       - ./app:/app
     depends_on:
-      - redis
-      - backend
-      - beat
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+      beat:
+        condition: service_started
     env_file:
       - .env
     restart: unless-stopped
