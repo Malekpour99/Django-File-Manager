@@ -51,7 +51,8 @@ services:
   backend:
     build:
       context: .
-    command: uv run python manage.py runserver 0.0.0.0:8000
+      target: development
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     container_name: django-backend-service
     ports:
       - "8000:8000"
@@ -72,9 +73,11 @@ services:
   beat:
     build:
       context: .
-    command: uv run celery -A core beat -l INFO
+      target: development
+    command: ["celery", "-A", "core", "beat", "-l", "INFO", "--schedule=/var/lib/celery/celerybeat-schedule"]
     volumes:
       - ./app:/app
+      - celerybeat-data:/var/lib/celery
     depends_on:
       redis:
         condition: service_healthy
@@ -88,7 +91,8 @@ services:
   worker:
     build:
       context: .
-    command: uv run celery -A core worker -l INFO
+      target: development
+    command: ["celery", "-A", "core", "worker", "-l", "INFO"]
     volumes:
       - ./app:/app
     depends_on:
@@ -119,6 +123,7 @@ services:
       - ServerOptions__HostName=smtp4dev
 
 volumes:
+  celerybeat-data:
   smtp4dev-data:
   postgres-data:
   minio-data:

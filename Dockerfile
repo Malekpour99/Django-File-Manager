@@ -1,28 +1,44 @@
 # syntax=docker/dockerfile:1
-FROM python:3.13-alpine
+FROM ghcr.io/astral-sh/uv:0.13.1 AS uv
 
-# Install uv and uvx binaries from the Astral SH GitHub Container Registry
-# COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-RUN pip install uv
-
-# Set up environment variables for the virtual environment and Python settings
-ARG VENV_PATH=/opt/venv
+FROM python:3.13-alpine AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
 
-# Install ffmpeg for video processing
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg \
+    && addgroup -g 1000 app \
+    && adduser -D -u 1000 -G app app \
+    && mkdir -p /app/media /app/staticfiles /var/lib/celery \
+    && chown app:app /app/media /app/staticfiles /var/lib/celery
 
-# Set the working directory for the application
 WORKDIR /app
 
-# Cache dependencies independently of application source changes.
+FROM base AS dependencies
+COPY --from=uv /uv /usr/local/bin/uv
 COPY ./app/pyproject.toml ./app/uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --no-editable --locked --no-dev --no-install-project
+    uv sync --locked --no-dev --no-install-project
 
-# The project is not packaged; application modules run directly from /app.
+FROM dependencies AS development-dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-install-project
+
+FROM base AS development
+COPY --from=development-dependencies /opt/venv /opt/venv
 COPY ./app .
+USER app
+EXPOSE 8000
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+FROM base AS production
+COPY --from=dependencies /opt/venv /opt/venv
+COPY ./app .
+ENV DJANGO_SETTINGS_MODULE=core.django.production
+USER app
+EXPOSE 8000
+CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]

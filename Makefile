@@ -41,19 +41,19 @@ logs:
 	docker compose logs -f $(service)
 
 migrate:
-	docker compose exec backend uv run python manage.py migrate
+	docker compose exec backend python manage.py migrate
 
 superuser:
-	docker compose exec backend uv run python manage.py createsuperuser
+	docker compose exec backend python manage.py createsuperuser
 
 test:
-	docker compose exec backend uv run pytest .
+	docker compose exec backend pytest .
 
 lint:
-	docker compose exec backend uv run ruff check .
+	docker compose exec backend ruff check .
 
 shell:
-	docker compose exec backend uv run python manage.py shell
+	docker compose exec backend python manage.py shell
 
 clean:
 	@read -p "This will remove all containers and volumes. Are you sure? [y/N] " confirm; \
