@@ -3,24 +3,10 @@ from django.test import Client
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-import os
 import pytest
 
 from accounts.models import Profile
 from filemanager.models import File, Folder
-
-# test image paths for tests
-source_path = "statics/img/test.jpg"
-destination_path = "media/test.jpg"
-
-# Check if the file doesn't exist in the destination
-if not os.path.exists(destination_path):
-    # Copying test image to the media folder for tests
-    with open(source_path, "rb") as src_file:
-        content = src_file.read()
-
-    with open(destination_path, "wb") as dest_file:
-        dest_file.write(content)
 
 
 @pytest.fixture
@@ -50,18 +36,13 @@ def folder(profile):
 
 @pytest.fixture
 def file(profile, folder):
+    with open("statics/img/test.jpg", "rb") as source:
+        upload = SimpleUploadedFile(
+            "test.jpg", source.read(), content_type="image/jpeg"
+        )
     return File.objects.create(
-        name="Test File", owner=profile, folder=folder, file="./test.jpg"
+        name="Test File", owner=profile, folder=folder, file=upload
     )
-
-
-@pytest.fixture(autouse=True)
-def cleanup():
-    yield
-    # Removing uploaded file during file upload test
-    uploaded_file_path = "media/uploads/test.jpg"
-    if os.path.exists(uploaded_file_path):
-        os.remove(uploaded_file_path)
 
 
 @pytest.mark.django_db
@@ -79,7 +60,7 @@ def test_content_view(client, folder, file):
 @pytest.mark.django_db
 def test_file_upload_view(client, folder):
     url = reverse("filemanager:upload-file")
-    with open("media/test.jpg", "rb") as fp:
+    with open("statics/img/test.jpg", "rb") as fp:
         # simulating a real file upload
         file_data = SimpleUploadedFile(fp.name, fp.read(), content_type="image/jpeg")
         response = client.post(url, {"file": file_data, "folder": folder.id})

@@ -51,7 +51,76 @@ make migrate # run database migrations
 
 ## Configuration
 
-Edit the generated `.env` file with your own values before starting the project. Refer to `.env.example` for available options.
+Settings follow [HackSoft's Django Styleguide](https://github.com/HackSoftware/Django-Styleguide#settings), retaining the existing `core` package and `python-decouple` dependency:
+
+```text
+app/core/
+├── env.py                 # shared environment reader
+├── django/
+│   ├── base.py            # Django settings; imports every integration
+│   ├── local.py           # development defaults
+│   ├── production.py      # deployment checks and HTTPS defaults
+│   ├── stage.py           # production defaults for staging
+│   └── test.py            # isolated test backends
+└── settings/              # storage, caching, Celery, CORS, email, logging, DRF
+```
+
+Edit `.env` before starting. Fill in `DJANGO_DB_PASSWORD`, matching
+`POSTGRES_PASSWORD`, and the MinIO access/secret keys. Set a strong
+`DJANGO_SECRET_KEY` for deployment. `.env` is read from the repository root
+locally; Docker Compose passes its values to containers. Process variables take
+precedence over `.env` values with the same name.
+
+`manage.py` and Celery default to `core.django.local`; WSGI and ASGI default to
+`core.django.production`. Set `DJANGO_SETTINGS_MODULE` in the process environment
+to override these defaults. The Compose `.env.example` selects local settings.
+When running outside Compose, export this variable explicitly or pass
+`--settings=core.django.production` to management commands; Django chooses its
+settings module before loading the settings `.env` reader.
+
+Django-specific variables use the `DJANGO_` prefix. Previous names (`SECRET_KEY`,
+`DEBUG`, `ALLOWED_HOSTS`, `LOG_LEVEL`, and `DB_*`) remain accepted outside tests,
+with prefixed names taking priority. Replace any references to the former
+`core.settings` module with the appropriate `core.django.*` module.
+
+To migrate an existing Docker `.env`, keep your credentials and add:
+
+```dotenv
+DJANGO_SETTINGS_MODULE=core.django.local
+USE_MINIO=True
+USE_REDIS_CACHE=True
+USE_CELERY=True
+DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+DJANGO_EMAIL_HOST=smtp4dev
+```
+
+These integration flags default to `False`; `.env.example` enables them for
+Docker. Disabled integrations use local file storage, in-process memory caching,
+and synchronous Celery tasks. Enabled integrations require their connection
+variables. PostgreSQL remains the application database. Email defaults to the
+console backend, and logs go to stderr for collection by Docker.
+
+CORS defaults to same-origin access. For a separate frontend, set
+`DJANGO_CORS_ALLOWED_ORIGINS` to comma-separated full origins (including scheme
+and port). Configure `DJANGO_CSRF_TRUSTED_ORIGINS` separately when needed.
+
+For staging, set `DJANGO_SETTINGS_MODULE=core.django.stage` in the process
+environment (or the Compose `.env`). Stage inherits production settings; supply
+separate staging credentials, database, storage buckets, Redis databases, and
+allowed hosts through environment variables.
+
+Production and stage force debug off, require a nonempty secret and explicit allowed
+hosts, and defaults to HTTPS redirects and secure cookies. Configure TLS and
+static/media serving in your deployment. HSTS is opt-in through
+`DJANGO_SECURE_HSTS_SECONDS`; enable it after HTTPS is verified. If TLS terminates
+at a proxy, configure Django's proxy SSL handling for your trusted proxy before
+enabling redirects.
+
+Pytest selects `core.django.test`, ignores the local `.env` and legacy variable
+names, and uses SQLite, in-memory file storage/cache/email, fast password hashing,
+and eager Celery tasks. It requires no running external services. Run locally
+from `app/` with `../.venv/bin/pytest` (or `uv run pytest` with dev dependencies).
+SQLite tests do not validate PostgreSQL-specific behavior.
 
 ## Creating a Superuser
 
