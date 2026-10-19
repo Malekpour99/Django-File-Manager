@@ -30,6 +30,27 @@ make up      # start all services
 make migrate # run database migrations
 ```
 
+## Docker Images
+
+Compose builds the `development` target, including pytest and Ruff. Commands use
+installed executables directly; dependencies are installed only during the build.
+Rebuild with `make build` and recreate containers with `make up` after changing
+`pyproject.toml` or `uv.lock`.
+
+The default Dockerfile target is `production`, containing production dependencies
+and using Gunicorn. Build it with:
+
+```sh
+docker build --target production -t django-file-manager:production .
+```
+
+Deploy this image with environment variables for `core.django.production` or
+`core.django.stage`. The Compose file remains the local development configuration.
+Both targets run as UID/GID 1000 and keep dependencies in `/opt/venv`, outside the
+`/app` development bind mount. Bind-mounted files and writable data volumes must
+have permissions for this user. Celery Beat stores its schedule in the
+`celerybeat-data` volume.
+
 ## Available Make Commands
 
 | Command                    | Description                                      |
