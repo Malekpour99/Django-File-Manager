@@ -82,9 +82,10 @@ class TestAccountsViews:
         user = create_user("test@example.com", "password123")
         client.force_login(user=user)
         url = reverse("accounts:logout")
-        response = client.get(url)
+        response = client.post(url)
         # After a successful logout we don't redirect; we inform the user
         assert response.status_code == 200
+        assert not response.wsgi_request.user.is_authenticated
         # Check if the user is actually logged out by verifying no user is authenticated
         response = client.get(reverse("accounts:login"))
         assert response.status_code == 200  # The login page should be accessible
