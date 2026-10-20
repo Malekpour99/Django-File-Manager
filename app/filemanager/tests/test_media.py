@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile, TemporaryUploadedFile
 from PIL import Image
 
-from app.filemanager import services
+from filemanager import services
 from filemanager.models import File, validate_file_type
 
 

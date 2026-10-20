@@ -11,7 +11,7 @@ from django.db.models.fields.files import FieldFile
 from django.db.models.signals import post_delete
 from django.utils.translation import gettext_lazy as _
 
-from app.filemanager.services import (
+from filemanager.services import (
     InvalidMediaError,
     prepare_media,
 )
