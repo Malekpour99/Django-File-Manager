@@ -2,6 +2,10 @@
 
 from core.env import env
 
+FFMPEG_BINARY = env("FFMPEG_BINARY", default="ffmpeg")
+FFPROBE_BINARY = env("FFPROBE_BINARY", default="ffprobe")
+MEDIA_PROCESS_TIMEOUT = env("MEDIA_PROCESS_TIMEOUT", default=30, cast=int)
+
 USE_MINIO = env("USE_MINIO", default=False, cast=bool)
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

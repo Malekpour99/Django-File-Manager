@@ -17,7 +17,6 @@ dependencies = [
     "drf-yasg[validation]>=1.21.15",
     "gunicorn>=26.0.0",
     "markdown>=3.10.2",
-    "moviepy>=1.0.3",
     "pillow>=12.2.0",
     "psycopg2-binary>=2.9.12",
     "python-decouple>=3.8",

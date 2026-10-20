@@ -1,7 +1,5 @@
-import io
 import logging
 import os
-import tempfile
 from typing import Optional
 
 from django.db import models
@@ -13,15 +11,15 @@ from django.db.models.fields.files import FieldFile
 from django.db.models.signals import post_delete
 from django.utils.translation import gettext_lazy as _
 
-import mimetypes
-from PIL import Image
-from moviepy.video.io.VideoFileClip import VideoFileClip
+from app.filemanager.services import (
+    InvalidMediaError,
+    prepare_media,
+)
 
 from .base import BaseModel
 from .folder import Folder
 
 # Default Thumbnail for video files
-DEFAULT_THUMBNAIL_SIZE = (100, 100)
 DEFAULT_THUMBNAIL_PATH = "static/img/default-video-thumbnail.png"
 
 FILE_TYPE_CHOICES = [
@@ -34,46 +32,12 @@ logger = logging.getLogger(__name__)
 
 # File type custom validator
 def validate_file_type(value):
-    valid_mime_types = [
-        "image/jpeg",
-        "image/jpg",
-        "image/png",
-        "image/gif",
-        "image/bmp",
-        "image/tiff",
-        "video/mp4",
-        "video/mkv",
-        "video/wmv",
-        "video/mov",
-        "video/avi",
-        "video/mpeg",
-        "video/quicktime",
-        "video/x-msvideo",
-        "video/x-ms-wmv",
-    ]
-    mime_type, encoding = mimetypes.guess_type(value.name)
-    if mime_type not in valid_mime_types or mime_type is None:
-        raise ValidationError(
-            _("Unsupported file type. Only videos and images are supported.")
-        )
-    if mime_type and mime_type.startswith("image"):
-        try:
-            # Verify uploaded file is an image
-            image = Image.open(value)
-            image.verify()
-        except Exception:
-            raise ValidationError(
-                _("Unsupported file type. Your file is not a valid image.")
-            )
-    if mime_type and mime_type.startswith("video"):
-        try:
-            # Verify uploaded file is a video
-            clip = VideoFileClip(value.temporary_file_path())
-            clip.reader.close()  # Close the reader
-        except Exception:
-            raise ValidationError(
-                _("Unsupported file type. Your file is not a valid video.")
-            )
+    # Reject oversized uploads before invoking image or video decoders.
+    validate_file_size(value)
+    try:
+        prepare_media(value)
+    except InvalidMediaError as error:
+        raise ValidationError(str(error)) from error
 
 
 # File size custom validator
@@ -124,9 +88,9 @@ class File(BaseModel):
             self.size = self.file.size
         if not self.type:
             self.type = self.choose_file_type()
-        super().save(*args, **kwargs)
         if not self.thumbnail:
-            self.create_thumbnail()
+            self.create_thumbnail(save=False)
+        super().save(*args, **kwargs)
 
     def get_thumbnail_name(self, original_filename, force_jpg=False):
         """
@@ -142,81 +106,41 @@ class File(BaseModel):
         return base_name
 
     def choose_file_type(self):
-        mime_type, _ = mimetypes.guess_type(self.file.name)
-        if mime_type.startswith("image"):
-            return "image"
-        elif mime_type.startswith("video"):
-            return "video"
-
-    def create_thumbnail(self):
-        mime_type, _ = mimetypes.guess_type(self.file.name)
-        if mime_type and mime_type.startswith("image"):
-            self.create_image_thumbnail()
-        elif mime_type and mime_type.startswith("video"):
-            self.create_video_thumbnail()
-
-    def create_image_thumbnail(self):
-        thumbnail_size = DEFAULT_THUMBNAIL_SIZE
-        image = Image.open(self.file)
-
-        # Convert images with transparency to RGB
-        if image.mode in ("RGBA", "LA", "P"):
-            image = image.convert("RGB")
-        
-        image.thumbnail(thumbnail_size, Image.LANCZOS)
-
-        # Convert image to bytes
-        thumb_io = io.BytesIO()
-        image.save(thumb_io, format="JPEG")
-        thumb_io.seek(0)
-
-        # Use original filename for thumbnail
-        thumbnail_name = self.get_thumbnail_name(self.file.name)
-
-        # Save thumbnail to MinIO using Django's storage
-        self.thumbnail.save(
-            thumbnail_name, ContentFile(thumb_io.getvalue()), save=False
-        )
-
-        self.save()
-
-    def create_video_thumbnail(self):
-        thumbnail_size = DEFAULT_THUMBNAIL_SIZE
         try:
-            # Create a temporary file to process the video
-            with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_video:
-                # Read video from MinIO and write to temp file
-                for chunk in self.file.chunks():
-                    temp_video.write(chunk)
-                temp_video.flush()
+            return prepare_media(self.file)[0]
+        except InvalidMediaError as error:
+            raise ValidationError(str(error)) from error
 
-                # Process video and create thumbnail
-                clip = VideoFileClip(temp_video.name)
-                frame = clip.get_frame(1)
-                clip.close()
+    def create_thumbnail(self, *, save=True):
+        kind = self.type or self.choose_file_type()
+        if kind == "image":
+            self.create_image_thumbnail(save=save)
+        elif kind == "video":
+            self.create_video_thumbnail(save=save)
 
-                thumbnail = Image.fromarray(frame)
-                thumbnail.thumbnail(thumbnail_size)
+    def create_image_thumbnail(self, *, save=True):
+        self.thumbnail.save(
+            self.get_thumbnail_name(self.file.name, force_jpg=True),
+            ContentFile(prepare_media(self.file)[1]),
+            save=False,
+        )
+        if save:
+            self.save()
 
-                # Convert thumbnail to bytes
-                thumb_io = io.BytesIO()
-                thumbnail.save(thumb_io, format="JPEG")
-                thumb_io.seek(0)
-
-                # Use original filename for thumbnail with .jpg extension
-                thumbnail_name = self.get_thumbnail_name(self.file.name, force_jpg=True)
-
-                # Save thumbnail to MinIO
-                self.thumbnail.save(
-                    thumbnail_name, ContentFile(thumb_io.getvalue()), save=False
-                )
-        except Exception as error:
-            logger.error(
-                f"Failed to create thumbnail for video {self.file.name}: {error}"
-            )
+    def create_video_thumbnail(self, *, save=True):
+        try:
+            content = prepare_media(self.file)[1]
+        except InvalidMediaError:
+            logger.exception("Failed to create video thumbnail for %s", self.file.name)
             self.thumbnail = DEFAULT_THUMBNAIL_PATH
-
-        self.save()
+        else:
+            self.thumbnail.save(
+                self.get_thumbnail_name(self.file.name, force_jpg=True),
+                ContentFile(content),
+                save=False,
+            )
+        if save:
+            self.save()
 
     class Meta:
         unique_together = ("name", "folder", "owner")
