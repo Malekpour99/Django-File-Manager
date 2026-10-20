@@ -104,27 +104,6 @@ Django-specific variables use the `DJANGO_` prefix. Previous names (`SECRET_KEY`
 with prefixed names taking priority. Replace any references to the former
 `core.settings` module with the appropriate `core.django.*` module.
 
-To migrate an existing Docker `.env`, keep your credentials and add:
-
-```dotenv
-DJANGO_SETTINGS_MODULE=core.django.local
-USE_MINIO=True
-USE_REDIS_CACHE=True
-USE_CELERY=True
-DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-DJANGO_EMAIL_HOST=smtp4dev
-```
-
-These integration flags default to `False`; `.env.example` enables them for
-Docker. Disabled integrations use local file storage, in-process memory caching,
-and synchronous Celery tasks. Enabled integrations require their connection
-variables. PostgreSQL remains the application database. Email defaults to the
-console backend, and logs go to stderr for collection by Docker.
-
-CORS defaults to same-origin access. For a separate frontend, set
-`DJANGO_CORS_ALLOWED_ORIGINS` to comma-separated full origins (including scheme
-and port). Configure `DJANGO_CSRF_TRUSTED_ORIGINS` separately when needed.
-
 For staging, set `DJANGO_SETTINGS_MODULE=core.django.stage` in the process
 environment (or the Compose `.env`). Stage inherits production settings; supply
 separate staging credentials, database, storage buckets, Redis databases, and
